@@ -1,0 +1,31 @@
+{
+  "name": "movie-haven",
+  "private": true,
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "type-check": "turbo type-check",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json,css}\" --ignore-path .gitignore",
+    "clean": "turbo clean",
+    "infra:up": "docker compose up -d",
+    "infra:down": "docker compose down",
+    "infra:reset": "docker compose down -v && docker compose up -d",
+    "db:push": "pnpm --filter @movie-haven/db push",
+    "db:generate": "pnpm --filter @movie-haven/db generate",
+    "db:migrate": "pnpm --filter @movie-haven/db migrate",
+    "db:studio": "pnpm --filter @movie-haven/db studio"
+  },
+  "devDependencies": {
+    "prettier": "^3.4.2",
+    "prettier-plugin-tailwindcss": "^0.6.11",
+    "turbo": "^2.4.4",
+    "typescript": "^5.8.3"
+  },
+  "packageManager": "pnpm@9.15.4"
+}
