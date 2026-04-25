@@ -1,0 +1,6 @@
+/* Base styles exported from @movie-haven/ui for use in consuming apps */
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+}

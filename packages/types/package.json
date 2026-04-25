@@ -1,0 +1,13 @@
+{
+  "name": "@movie-haven/types",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "devDependencies": {
+    "@movie-haven/config": "workspace:*",
+    "typescript": "^5.8.3"
+  }
+}
