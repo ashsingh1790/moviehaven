@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { desc, asc, eq, and, gte, lte, ilike, sql } from "drizzle-orm";
 import { films } from "@movie-haven/db";
-import { publicProcedure, protectedProcedure, router } from "../init";
+import { publicProcedure, router } from "../init";
 
 const filmSearchInput = z.object({
   query: z.string().optional(),
@@ -48,7 +48,7 @@ export const filmsRouter = router({
     }
 
     const orderBy = sort?.length
-      ? sort.map((s) => {
+      ? sort.map(s => {
           const col = films[s.field as keyof typeof films] as Parameters<typeof asc>[0];
           return s.direction === "asc" ? asc(col) : desc(col);
         })
@@ -64,10 +64,7 @@ export const filmsRouter = router({
         .orderBy(...orderBy)
         .limit(limit)
         .offset(offset),
-      ctx.db
-        .select({ count: sql<number>`count(*)::int` })
-        .from(films)
-        .where(where),
+      ctx.db.select({ count: sql<number>`count(*)::int` }).from(films).where(where),
     ]);
 
     const total = countResult[0]?.count ?? 0;
@@ -81,19 +78,17 @@ export const filmsRouter = router({
     };
   }),
 
-  byId: publicProcedure
-    .input(z.object({ id: z.number() }))
-    .query(async ({ ctx, input }) => {
-      const film = await ctx.db.query.films.findFirst({
-        where: eq(films.id, input.id),
-      });
+  byId: publicProcedure.input(z.object({ id: z.number() })).query(async ({ ctx, input }) => {
+    const film = await ctx.db.query.films.findFirst({
+      where: eq(films.id, input.id),
+    });
 
-      if (!film) {
-        throw new Error("Film not found");
-      }
+    if (!film) {
+      throw new Error("Film not found");
+    }
 
-      return film;
-    }),
+    return film;
+  }),
 
   byTmdbId: publicProcedure
     .input(z.object({ tmdbId: z.number() }))

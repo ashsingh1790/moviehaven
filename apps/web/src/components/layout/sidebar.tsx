@@ -30,14 +30,14 @@ export function FilterSidebar() {
         <div className="space-y-1 p-4">
           <GenreFilter
             selected={filters.genres ?? []}
-            onChange={(genres) => setFilter("genres", genres)}
+            onChange={genres => setFilter("genres", genres)}
           />
 
           <Separator className="my-3" />
 
           <CountryFilter
             selected={filters.countries ?? []}
-            onChange={(countries) => setFilter("countries", countries)}
+            onChange={countries => setFilter("countries", countries)}
           />
 
           <Separator className="my-3" />
@@ -71,7 +71,7 @@ export function FilterSidebar() {
 
           <StreamingFilter
             selected={filters.streamingPlatforms ?? []}
-            onChange={(platforms) => setFilter("streamingPlatforms", platforms)}
+            onChange={platforms => setFilter("streamingPlatforms", platforms)}
           />
         </div>
       </ScrollArea>

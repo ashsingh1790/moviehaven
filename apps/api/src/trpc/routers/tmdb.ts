@@ -43,9 +43,11 @@ function shape(movie: TmdbMovie): PopularMovie {
 export const tmdbRouter = router({
   popularMovies: publicProcedure
     .input(
-      z.object({
-        limit: z.number().min(1).max(20).default(10),
-      }).optional(),
+      z
+        .object({
+          limit: z.number().min(1).max(20).default(10),
+        })
+        .optional(),
     )
     .query(async ({ ctx, input }): Promise<PopularMovie[]> => {
       const limit = input?.limit ?? 10;
@@ -56,7 +58,7 @@ export const tmdbRouter = router({
         return JSON.parse(cached) as PopularMovie[];
       }
 
-      let movies;
+      let movies: TmdbMovie[];
       try {
         movies = await discoverPopularThisWeek(limit);
       } catch (err) {

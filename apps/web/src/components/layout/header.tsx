@@ -49,7 +49,7 @@ export function Header() {
           {user ? (
             <div className="relative" ref={menuRef}>
               <button
-                onClick={() => setMenuOpen((o) => !o)}
+                onClick={() => setMenuOpen(o => !o)}
                 className="flex items-center gap-2 rounded-full border border-border bg-secondary px-3 py-1.5 text-sm hover:bg-accent transition-colors"
               >
                 <User className="h-4 w-4 text-primary" />
@@ -65,7 +65,10 @@ export function Header() {
                   </div>
                   <div className="p-1">
                     <button
-                      onClick={() => { setMenuOpen(false); logout(); }}
+                      onClick={() => {
+                        setMenuOpen(false);
+                        logout();
+                      }}
                       className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent transition-colors text-left"
                     >
                       <LogOut className="h-4 w-4" />

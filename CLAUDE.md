@@ -18,6 +18,16 @@ pnpm lint
 pnpm type-check
 pnpm format
 
+# Testing (Test-Driven Development)
+pnpm test             # Run all tests (watch mode)
+pnpm test:unit        # Run unit tests once
+pnpm test:integration # Run integration tests once
+pnpm test:e2e         # Run end-to-end tests (Playwright)
+pnpm test:ui          # Open test UI dashboard
+pnpm test:coverage    # Check test coverage
+pnpm test:watch       # Run tests in watch mode
+pnpm test:debug       # Debug tests in browser
+
 # Local infrastructure (Postgres + Redis via Docker)
 pnpm infra:up
 pnpm infra:down
@@ -72,6 +82,26 @@ Auth uses **custom JWT** (via `jose`), not Clerk (the package is installed but n
 3. Middleware reads and verifies the cookie on every request
 4. Client-side tRPC reads the cookie and forwards it as a `Authorization: Bearer` header to the API
 5. API context extracts `userId` from the Bearer token for protected procedures
+
+### Testing Strategy (Test-Driven Development)
+
+Movie Haven uses **TDD (Test-Driven Development)**:
+1. **Write tests first** (RED phase) — test will fail
+2. **Write minimal code** (GREEN phase) — make test pass
+3. **Refactor** (REFACTOR phase) — improve code while tests stay green
+
+**Test Coverage:**
+- **Unit tests** (60%) — Individual functions in isolation (Vitest)
+- **Integration tests** (30%) — APIs with real DB (Vitest + test database)
+- **E2E tests** (10%) — User flows in browser (Playwright)
+
+**Coverage Targets:**
+- Auth routes: 90%
+- Recommendation engine: 85%
+- Films API: 80%
+- Overall: 80% minimum
+
+See [TESTING.md](./TESTING.md) for detailed guide, examples, and best practices.
 
 ### Data sources
 

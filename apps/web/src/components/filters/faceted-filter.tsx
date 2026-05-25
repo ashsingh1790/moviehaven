@@ -35,7 +35,7 @@ export function GenreFilter({ selected, onChange }: GenreFilterProps) {
 
   function toggle(id: number) {
     if (selected.includes(id)) {
-      onChange(selected.filter((g) => g !== id));
+      onChange(selected.filter(g => g !== id));
     } else {
       onChange([...selected, id]);
     }
@@ -44,16 +44,18 @@ export function GenreFilter({ selected, onChange }: GenreFilterProps) {
   return (
     <div>
       <button
-        onClick={() => setExpanded((e) => !e)}
+        onClick={() => setExpanded(e => !e)}
         className="flex w-full items-center justify-between py-1 text-sm font-medium hover:text-primary transition-colors"
       >
-        <span>Genres {selected.length > 0 && <span className="text-primary">({selected.length})</span>}</span>
+        <span>
+          Genres {selected.length > 0 && <span className="text-primary">({selected.length})</span>}
+        </span>
         <ChevronDown className={cn("h-4 w-4 transition-transform", expanded && "rotate-180")} />
       </button>
 
       {expanded && (
         <div className="mt-2 flex flex-wrap gap-1.5">
-          {GENRES.map((genre) => {
+          {GENRES.map(genre => {
             const isSelected = selected.includes(genre.id);
             return (
               <button

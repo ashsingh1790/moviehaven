@@ -1,4 +1,4 @@
-import { jwtVerify, SignJWT } from "jose";
+import { jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { SESSION_COOKIE, SESSION_EXPIRY_DAYS } from "./auth-constants";
 
@@ -10,7 +10,7 @@ export interface SessionUser {
 }
 
 function secret() {
-  const key = process.env["JWT_SECRET"];
+  const key = process.env.JWT_SECRET;
   if (!key) throw new Error("JWT_SECRET is not set");
   return new TextEncoder().encode(key);
 }

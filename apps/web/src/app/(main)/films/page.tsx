@@ -59,7 +59,7 @@ function FilmGrid({ onOpenFilters }: { onOpenFilters: () => void }) {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               value={filters.query ?? ""}
-              onChange={(e) => setFilter("query", e.target.value || null)}
+              onChange={e => setFilter("query", e.target.value || null)}
               placeholder="Search films..."
               className="w-full rounded-md border border-border bg-input pl-9 pr-4 py-2 text-sm outline-none focus:border-primary/50 placeholder:text-muted-foreground transition-colors"
             />
@@ -90,7 +90,7 @@ function FilmGrid({ onOpenFilters }: { onOpenFilters: () => void }) {
               isFetching && "opacity-60",
             )}
           >
-            {data?.items.map((film) => (
+            {data?.items.map(film => (
               <FilmCard
                 key={film.id}
                 film={{
@@ -111,7 +111,7 @@ function FilmGrid({ onOpenFilters }: { onOpenFilters: () => void }) {
             <Pagination
               page={filters.page}
               totalPages={data.totalPages}
-              onPageChange={(p) => setFilter("page", p)}
+              onPageChange={p => setFilter("page", p)}
             />
           )}
         </>

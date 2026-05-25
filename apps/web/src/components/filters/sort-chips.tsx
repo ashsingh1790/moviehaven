@@ -2,7 +2,6 @@
 
 import { ArrowDown, ArrowUp, Plus, X } from "lucide-react";
 import type { SortChip, SortField } from "@movie-haven/types";
-import { cn } from "@movie-haven/ui";
 
 const SORT_OPTIONS: { field: SortField; label: string }[] = [
   { field: "tmdbScore", label: "TMDB Score" },
@@ -19,8 +18,8 @@ interface SortChipsProps {
 }
 
 export function SortChips({ sort, onChange }: SortChipsProps) {
-  const usedFields = new Set(sort.map((s) => s.field));
-  const available = SORT_OPTIONS.filter((o) => !usedFields.has(o.field));
+  const usedFields = new Set(sort.map(s => s.field));
+  const available = SORT_OPTIONS.filter(o => !usedFields.has(o.field));
 
   function addSort(field: SortField) {
     if (sort.length >= 3) return;
@@ -48,7 +47,7 @@ export function SortChips({ sort, onChange }: SortChipsProps) {
           className="flex items-center gap-0.5 rounded-full border border-primary/40 bg-primary/10 pl-2.5 pr-1 py-1 text-xs font-medium text-primary"
         >
           <span className="mr-0.5">{index + 1}.</span>
-          <span>{SORT_OPTIONS.find((o) => o.field === chip.field)?.label}</span>
+          <span>{SORT_OPTIONS.find(o => o.field === chip.field)?.label}</span>
           <button
             onClick={() => toggleDirection(index)}
             className="ml-1 hover:text-primary/70 transition-colors"
@@ -76,7 +75,7 @@ export function SortChips({ sort, onChange }: SortChipsProps) {
             Add sort
           </button>
           <div className="absolute top-full left-0 z-10 mt-1 hidden group-focus-within:block group-hover:block min-w-[160px] rounded-lg border border-border bg-popover py-1 shadow-lg">
-            {available.map((option) => (
+            {available.map(option => (
               <button
                 key={option.field}
                 onClick={() => addSort(option.field)}

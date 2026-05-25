@@ -27,7 +27,7 @@ export const ratings = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [
+  table => [
     unique("ratings_user_film_unique").on(table.userId, table.filmId),
     index("ratings_user_id_idx").on(table.userId),
     index("ratings_film_id_idx").on(table.filmId),

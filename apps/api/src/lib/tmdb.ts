@@ -2,7 +2,7 @@ const TMDB_BASE = "https://api.themoviedb.org/3";
 const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p";
 
 function getToken(): string {
-  const token = process.env["TMDB_READ_ACCESS_TOKEN"];
+  const token = process.env.TMDB_READ_ACCESS_TOKEN;
   if (!token) throw new Error("TMDB_READ_ACCESS_TOKEN is not set");
   return token;
 }
@@ -49,7 +49,10 @@ interface DiscoverResponse {
   total_results: number;
 }
 
-export function posterUrl(path: string | null, size: "w342" | "w500" | "w780" | "original" = "w500"): string | null {
+export function posterUrl(
+  path: string | null,
+  size: "w342" | "w500" | "w780" | "original" = "w500",
+): string | null {
   return path ? `${TMDB_IMAGE_BASE}/${size}${path}` : null;
 }
 

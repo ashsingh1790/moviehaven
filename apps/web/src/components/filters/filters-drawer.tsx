@@ -20,7 +20,9 @@ export function FiltersDrawer({ open, onClose }: FiltersDrawerProps) {
   // Close on Escape
   useEffect(() => {
     if (!open) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
   }, [open, onClose]);
@@ -28,7 +30,9 @@ export function FiltersDrawer({ open, onClose }: FiltersDrawerProps) {
   // Lock body scroll when open
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [open]);
 
   const activeCount = [
@@ -95,14 +99,14 @@ export function FiltersDrawer({ open, onClose }: FiltersDrawerProps) {
           <div className="space-y-1 p-4">
             <GenreFilter
               selected={filters.genres ?? []}
-              onChange={(genres) => setFilter("genres", genres)}
+              onChange={genres => setFilter("genres", genres)}
             />
 
             <Separator className="my-3" />
 
             <CountryFilter
               selected={filters.countries ?? []}
-              onChange={(countries) => setFilter("countries", countries)}
+              onChange={countries => setFilter("countries", countries)}
             />
 
             <Separator className="my-3" />
@@ -136,7 +140,7 @@ export function FiltersDrawer({ open, onClose }: FiltersDrawerProps) {
 
             <StreamingFilter
               selected={filters.streamingPlatforms ?? []}
-              onChange={(platforms) => setFilter("streamingPlatforms", platforms)}
+              onChange={platforms => setFilter("streamingPlatforms", platforms)}
             />
           </div>
         </ScrollArea>

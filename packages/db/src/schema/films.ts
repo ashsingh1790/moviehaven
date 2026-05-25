@@ -31,9 +31,7 @@ export const films = pgTable(
     tmdbVoteCount: integer("tmdb_vote_count").default(0),
     popularity: real("popularity").default(0),
     adult: boolean("adult").default(false),
-    genres: jsonb("genres")
-      .$type<{ id: number; name: string }[]>()
-      .default([]),
+    genres: jsonb("genres").$type<{ id: number; name: string }[]>().default([]),
     originCountries: jsonb("origin_countries").$type<string[]>().default([]),
     spokenLanguages: jsonb("spoken_languages")
       .$type<{ iso_639_1: string; name: string }[]>()
@@ -44,7 +42,7 @@ export const films = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [
+  table => [
     index("films_tmdb_id_idx").on(table.tmdbId),
     index("films_release_year_idx").on(table.releaseYear),
     index("films_tmdb_score_idx").on(table.tmdbScore),

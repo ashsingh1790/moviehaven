@@ -145,9 +145,7 @@ export const authRouter = router({
     return { username: generateUsername() };
   }),
 
-  suggestUsernames: publicProcedure
-    .input(z.object({ input: z.string() }))
-    .query(({ input }) => {
-      return { suggestions: suggestUsernames(input.input) };
-    }),
+  suggestUsernames: publicProcedure.input(z.object({ input: z.string() })).query(({ input }) => {
+    return { suggestions: suggestUsernames(input.input) };
+  }),
 });

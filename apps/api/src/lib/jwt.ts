@@ -6,7 +6,7 @@ export interface JwtPayload {
 }
 
 function secret() {
-  const key = process.env["JWT_SECRET"];
+  const key = process.env.JWT_SECRET;
   if (!key) throw new Error("JWT_SECRET is not set");
   return new TextEncoder().encode(key);
 }

@@ -1,18 +1,12 @@
 import { z } from "zod";
 import { eq, and } from "drizzle-orm";
-import { lists, listItems, users } from "@movie-haven/db";
+import { lists, listItems } from "@movie-haven/db";
 import { protectedProcedure, router } from "../init";
 
 export const listsRouter = router({
   myLists: protectedProcedure.query(async ({ ctx }) => {
-    const user = await ctx.db.query.users.findFirst({
-      where: eq(users.clerkId, ctx.userId),
-    });
-
-    if (!user) return [];
-
     return ctx.db.query.lists.findMany({
-      where: eq(lists.userId, user.id),
+      where: eq(lists.userId, ctx.userId),
     });
   }),
 
@@ -25,15 +19,9 @@ export const listsRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const user = await ctx.db.query.users.findFirst({
-        where: eq(users.clerkId, ctx.userId),
-      });
-
-      if (!user) throw new Error("User not found");
-
       const [list] = await ctx.db
         .insert(lists)
-        .values({ userId: user.id, ...input })
+        .values({ userId: ctx.userId, ...input })
         .returning();
 
       return list;
@@ -42,14 +30,8 @@ export const listsRouter = router({
   addFilm: protectedProcedure
     .input(z.object({ listId: z.number(), filmId: z.number(), note: z.string().optional() }))
     .mutation(async ({ ctx, input }) => {
-      const user = await ctx.db.query.users.findFirst({
-        where: eq(users.clerkId, ctx.userId),
-      });
-
-      if (!user) throw new Error("User not found");
-
       const list = await ctx.db.query.lists.findFirst({
-        where: and(eq(lists.id, input.listId), eq(lists.userId, user.id)),
+        where: and(eq(lists.id, input.listId), eq(lists.userId, ctx.userId)),
       });
 
       if (!list) throw new Error("List not found");
@@ -66,17 +48,9 @@ export const listsRouter = router({
   removeFilm: protectedProcedure
     .input(z.object({ listId: z.number(), filmId: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      const user = await ctx.db.query.users.findFirst({
-        where: eq(users.clerkId, ctx.userId),
-      });
-
-      if (!user) throw new Error("User not found");
-
       await ctx.db
         .delete(listItems)
-        .where(
-          and(eq(listItems.listId, input.listId), eq(listItems.filmId, input.filmId)),
-        );
+        .where(and(eq(listItems.listId, input.listId), eq(listItems.filmId, input.filmId)));
 
       return { success: true };
     }),

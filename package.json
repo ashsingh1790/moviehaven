@@ -10,8 +10,9 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
+    "format": "biome format --write .",
+    "check": "biome check .",
     "type-check": "turbo type-check",
-    "format": "prettier --write \"**/*.{ts,tsx,md,json,css}\" --ignore-path .gitignore",
     "clean": "turbo clean",
     "infra:up": "docker compose up -d",
     "infra:down": "docker compose down",
@@ -22,8 +23,7 @@
     "db:studio": "pnpm --filter @movie-haven/db studio"
   },
   "devDependencies": {
-    "prettier": "^3.4.2",
-    "prettier-plugin-tailwindcss": "^0.6.11",
+    "@biomejs/biome": "^1.9.4",
     "turbo": "^2.4.4",
     "typescript": "^5.8.3"
   },

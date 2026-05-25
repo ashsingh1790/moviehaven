@@ -10,12 +10,12 @@ export type { AppRouter } from "./trpc/router";
 
 const server = Fastify({
   logger: {
-    level: process.env["NODE_ENV"] === "production" ? "warn" : "info",
+    level: process.env.NODE_ENV === "production" ? "warn" : "info",
   },
 });
 
 await server.register(cors, {
-  origin: process.env["ALLOWED_ORIGINS"]?.split(",") ?? ["http://localhost:3000"],
+  origin: process.env.ALLOWED_ORIGINS?.split(",") ?? ["http://localhost:3000"],
   credentials: true,
 });
 
@@ -34,8 +34,8 @@ await server.register(fastifyTRPCPlugin, {
 
 server.get("/health", async () => ({ status: "ok", timestamp: new Date().toISOString() }));
 
-const port = Number(process.env["API_PORT"] ?? 3001);
-const host = process.env["HOST"] ?? "0.0.0.0";
+const port = Number(process.env.API_PORT ?? 3001);
+const host = process.env.HOST ?? "0.0.0.0";
 
 try {
   await redis.connect();

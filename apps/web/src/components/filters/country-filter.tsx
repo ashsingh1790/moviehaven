@@ -42,14 +42,14 @@ export function CountryFilter({ selected, onChange }: CountryFilterProps) {
   const [search, setSearch] = useState("");
 
   const filtered = POPULAR_COUNTRIES.filter(
-    (c) =>
+    c =>
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.code.toLowerCase().includes(search.toLowerCase()),
   );
 
   function toggle(code: string) {
     if (selected.includes(code)) {
-      onChange(selected.filter((c) => c !== code));
+      onChange(selected.filter(c => c !== code));
     } else {
       onChange([...selected, code]);
     }
@@ -58,7 +58,7 @@ export function CountryFilter({ selected, onChange }: CountryFilterProps) {
   return (
     <div>
       <button
-        onClick={() => setExpanded((e) => !e)}
+        onClick={() => setExpanded(e => !e)}
         className="flex w-full items-center justify-between py-1 text-sm font-medium hover:text-primary transition-colors"
       >
         <span>
@@ -74,14 +74,14 @@ export function CountryFilter({ selected, onChange }: CountryFilterProps) {
             <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <input
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={e => setSearch(e.target.value)}
               placeholder="Search countries..."
               className="w-full rounded-md border border-border bg-input pl-7 pr-3 py-1.5 text-xs outline-none focus:border-primary/50 transition-colors"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-1">
-            {filtered.map((country) => {
+            {filtered.map(country => {
               const isSelected = selected.includes(country.code);
               return (
                 <button

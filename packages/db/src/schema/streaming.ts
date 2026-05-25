@@ -24,7 +24,7 @@ export const streamingAvailability = pgTable(
     available: boolean("available").default(true).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [
+  table => [
     unique("streaming_film_country_platform_unique").on(
       table.filmId,
       table.country,

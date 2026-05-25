@@ -58,21 +58,25 @@ export default function SignInPage() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium" htmlFor="email">Email</label>
+            <label className="text-sm font-medium" htmlFor="email">
+              Email
+            </label>
             <input
               id="email"
               type="email"
               required
               autoComplete="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
               className="w-full rounded-md border border-border bg-input px-3 py-2 text-sm outline-none focus:border-primary/60 placeholder:text-muted-foreground transition-colors"
               placeholder="you@example.com"
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium" htmlFor="password">Password</label>
+            <label className="text-sm font-medium" htmlFor="password">
+              Password
+            </label>
             <div className="relative">
               <input
                 id="password"
@@ -80,13 +84,13 @@ export default function SignInPage() {
                 required
                 autoComplete="current-password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={e => setPassword(e.target.value)}
                 className="w-full rounded-md border border-border bg-input px-3 py-2 pr-10 text-sm outline-none focus:border-primary/60 placeholder:text-muted-foreground transition-colors"
                 placeholder="••••••••"
               />
               <button
                 type="button"
-                onClick={() => setShowPassword((s) => !s)}
+                onClick={() => setShowPassword(s => !s)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

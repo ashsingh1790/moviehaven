@@ -22,7 +22,7 @@ export function RangeFilter({ label, min, max, step = 1, value, onChange }: Rang
   return (
     <div>
       <button
-        onClick={() => setExpanded((e) => !e)}
+        onClick={() => setExpanded(e => !e)}
         className="flex w-full items-center justify-between py-1 text-sm font-medium hover:text-primary transition-colors"
       >
         <span>
@@ -43,7 +43,7 @@ export function RangeFilter({ label, min, max, step = 1, value, onChange }: Rang
             max={max}
             step={step}
             value={value}
-            onValueChange={(v) => onChange(v as [number, number])}
+            onValueChange={v => onChange(v as [number, number])}
             className="w-full"
           />
           <div className="flex justify-between text-xs text-muted-foreground">

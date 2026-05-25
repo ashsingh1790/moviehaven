@@ -11,7 +11,7 @@ function getSessionToken(): string | undefined {
   if (typeof document === "undefined") return undefined;
   return document.cookie
     .split(";")
-    .find((c) => c.trim().startsWith(`${SESSION_COOKIE}=`))
+    .find(c => c.trim().startsWith(`${SESSION_COOKIE}=`))
     ?.split("=")[1];
 }
 
@@ -38,12 +38,12 @@ export function TRPCProvider({ children }: { children: React.ReactNode }) {
     trpc.createClient({
       links: [
         loggerLink({
-          enabled: (op) =>
-            process.env["NODE_ENV"] === "development" ||
+          enabled: op =>
+            process.env.NODE_ENV === "development" ||
             (op.direction === "down" && op.result instanceof Error),
         }),
         httpBatchLink({
-          url: `${process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:3001"}/trpc`,
+          url: `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001"}/trpc`,
           transformer: SuperJSON,
           headers() {
             const token = getSessionToken();

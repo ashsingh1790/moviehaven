@@ -39,7 +39,7 @@ export const listItems = pgTable(
     note: text("note"),
     addedAt: timestamp("added_at", { withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [
+  table => [
     unique("list_items_list_film_unique").on(table.listId, table.filmId),
     index("list_items_list_id_idx").on(table.listId),
   ],

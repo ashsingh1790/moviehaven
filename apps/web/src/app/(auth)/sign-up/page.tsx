@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Film, RefreshCw, Eye, EyeOff, Check, X, Loader2 } from "lucide-react";
@@ -25,7 +25,9 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
+  const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "available" | "taken">(
+    "idle",
+  );
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [generatingName, setGeneratingName] = useState(false);
@@ -39,12 +41,12 @@ export default function SignUpPage() {
       return;
     }
     setUsernameStatus("checking");
-    const apiBase = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:3001";
+    const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
     fetch(
       `${apiBase}/trpc/auth.checkUsername?input=${encodeURIComponent(JSON.stringify({ "0": { username: debouncedUsername } }))}`,
     )
-      .then((r) => r.json())
-      .then((data) => {
+      .then(r => r.json())
+      .then(data => {
         const available = data?.[0]?.result?.data?.json?.available;
         setUsernameStatus(available ? "available" : "taken");
       })
@@ -53,13 +55,16 @@ export default function SignUpPage() {
 
   // Suggestions when typing
   useEffect(() => {
-    if (!debouncedUsername) { setSuggestions([]); return; }
-    const apiBase = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:3001";
+    if (!debouncedUsername) {
+      setSuggestions([]);
+      return;
+    }
+    const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
     fetch(
       `${apiBase}/trpc/auth.suggestUsernames?input=${encodeURIComponent(JSON.stringify({ "0": { input: debouncedUsername } }))}`,
     )
-      .then((r) => r.json())
-      .then((data) => {
+      .then(r => r.json())
+      .then(data => {
         const s = data?.[0]?.result?.data?.json?.suggestions;
         if (Array.isArray(s)) setSuggestions(s);
       })
@@ -69,8 +74,10 @@ export default function SignUpPage() {
   async function generateUsername() {
     setGeneratingName(true);
     try {
-      const apiBase = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:3001";
-      const res = await fetch(`${apiBase}/trpc/auth.generateUsername?input=${encodeURIComponent(JSON.stringify({ "0": {} }))}`);
+      const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+      const res = await fetch(
+        `${apiBase}/trpc/auth.generateUsername?input=${encodeURIComponent(JSON.stringify({ "0": {} }))}`,
+      );
       const data = await res.json();
       const generated = data?.[0]?.result?.data?.json?.username;
       if (generated) setUsername(generated);
@@ -122,14 +129,16 @@ export default function SignUpPage() {
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Email */}
           <div className="space-y-1.5">
-            <label className="text-sm font-medium" htmlFor="email">Email</label>
+            <label className="text-sm font-medium" htmlFor="email">
+              Email
+            </label>
             <input
               id="email"
               type="email"
               required
               autoComplete="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
               className="w-full rounded-md border border-border bg-input px-3 py-2 text-sm outline-none focus:border-primary/60 placeholder:text-muted-foreground transition-colors"
               placeholder="you@example.com"
             />
@@ -137,7 +146,9 @@ export default function SignUpPage() {
 
           {/* Password */}
           <div className="space-y-1.5">
-            <label className="text-sm font-medium" htmlFor="password">Password</label>
+            <label className="text-sm font-medium" htmlFor="password">
+              Password
+            </label>
             <div className="relative">
               <input
                 id="password"
@@ -145,13 +156,13 @@ export default function SignUpPage() {
                 required
                 autoComplete="new-password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={e => setPassword(e.target.value)}
                 className="w-full rounded-md border border-border bg-input px-3 py-2 pr-10 text-sm outline-none focus:border-primary/60 placeholder:text-muted-foreground transition-colors"
                 placeholder="Min 8 chars, 1 uppercase, 1 number"
               />
               <button
                 type="button"
-                onClick={() => setShowPassword((s) => !s)}
+                onClick={() => setShowPassword(s => !s)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -160,15 +171,18 @@ export default function SignUpPage() {
             {password && (
               <div className="flex items-center gap-2">
                 <div className="flex gap-1 flex-1">
-                  {[1, 2, 3, 4].map((i) => (
+                  {[1, 2, 3, 4].map(i => (
                     <div
                       key={i}
                       className={`h-1 flex-1 rounded-full transition-colors ${
                         i <= passwordStrength.score
-                          ? passwordStrength.score <= 1 ? "bg-red-500"
-                            : passwordStrength.score <= 2 ? "bg-amber-500"
-                            : passwordStrength.score <= 3 ? "bg-yellow-400"
-                            : "bg-green-500"
+                          ? passwordStrength.score <= 1
+                            ? "bg-red-500"
+                            : passwordStrength.score <= 2
+                              ? "bg-amber-500"
+                              : passwordStrength.score <= 3
+                                ? "bg-yellow-400"
+                                : "bg-green-500"
                           : "bg-border"
                       }`}
                     />
@@ -203,25 +217,27 @@ export default function SignUpPage() {
                 type="text"
                 autoComplete="username"
                 value={username}
-                onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ""))}
+                onChange={e => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ""))}
                 className={`w-full rounded-md border bg-input px-3 py-2 pr-8 text-sm outline-none placeholder:text-muted-foreground transition-colors ${
-                  usernameStatus === "available" ? "border-green-500/60 focus:border-green-500"
-                  : usernameStatus === "taken" ? "border-red-500/60 focus:border-red-500"
-                  : "border-border focus:border-primary/60"
+                  usernameStatus === "available"
+                    ? "border-green-500/60 focus:border-green-500"
+                    : usernameStatus === "taken"
+                      ? "border-red-500/60 focus:border-red-500"
+                      : "border-border focus:border-primary/60"
                 }`}
                 placeholder="CrimsonAuteur"
               />
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                {usernameStatus === "checking" && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+                {usernameStatus === "checking" && (
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                )}
                 {usernameStatus === "available" && <Check className="h-4 w-4 text-green-500" />}
                 {usernameStatus === "taken" && <X className="h-4 w-4 text-red-500" />}
               </div>
             </div>
 
             {/* Status message */}
-            {usernameStatus === "taken" && (
-              <p className="text-xs text-red-500">Username taken</p>
-            )}
+            {usernameStatus === "taken" && <p className="text-xs text-red-500">Username taken</p>}
             {usernameStatus === "available" && (
               <p className="text-xs text-green-500">Username available</p>
             )}
@@ -231,7 +247,7 @@ export default function SignUpPage() {
               <div className="space-y-1.5">
                 <p className="text-xs text-muted-foreground">Suggestions:</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {suggestions.map((s) => (
+                  {suggestions.map(s => (
                     <button
                       key={s}
                       type="button"

@@ -3,16 +3,16 @@ import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 import { SESSION_COOKIE } from "@/lib/auth-constants";
 
-const PUBLIC_PATHS = ["/", "/sign-in", "/sign-up", "/films"];
+const PUBLIC_PATHS = ["/", "/sign-in", "/sign-up"];
 
 function isPublic(pathname: string): boolean {
-  return PUBLIC_PATHS.some((p) =>
-    p === "/" ? pathname === "/" : pathname === p || pathname.startsWith(p + "/"),
+  return PUBLIC_PATHS.some(p =>
+    p === "/" ? pathname === "/" : pathname === p || pathname.startsWith(`${p}/`),
   );
 }
 
 function secret() {
-  const key = process.env["JWT_SECRET"];
+  const key = process.env.JWT_SECRET;
   if (!key) throw new Error("JWT_SECRET is not set");
   return new TextEncoder().encode(key);
 }

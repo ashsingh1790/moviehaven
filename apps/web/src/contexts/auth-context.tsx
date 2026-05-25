@@ -36,11 +36,7 @@ export function AuthProvider({
     router.refresh();
   }, [router]);
 
-  return (
-    <AuthContext.Provider value={{ user, setUser, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, setUser, logout }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

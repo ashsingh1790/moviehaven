@@ -27,7 +27,7 @@ export function StreamingFilter({ selected, onChange }: StreamingFilterProps) {
 
   function toggle(id: string) {
     if (selected.includes(id)) {
-      onChange(selected.filter((p) => p !== id));
+      onChange(selected.filter(p => p !== id));
     } else {
       onChange([...selected, id]);
     }
@@ -36,7 +36,7 @@ export function StreamingFilter({ selected, onChange }: StreamingFilterProps) {
   return (
     <div>
       <button
-        onClick={() => setExpanded((e) => !e)}
+        onClick={() => setExpanded(e => !e)}
         className="flex w-full items-center justify-between py-1 text-sm font-medium hover:text-primary transition-colors"
       >
         <span>
@@ -48,7 +48,7 @@ export function StreamingFilter({ selected, onChange }: StreamingFilterProps) {
 
       {expanded && (
         <div className="mt-2 space-y-1">
-          {STREAMING_PLATFORMS.map((platform) => {
+          {STREAMING_PLATFORMS.map(platform => {
             const isSelected = selected.includes(platform.id);
             return (
               <button

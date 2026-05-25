@@ -7,11 +7,25 @@ import { getSession } from "@/lib/auth";
 
 // TMDb genre ID → label (most common genres)
 const GENRE_LABELS: Record<number, string> = {
-  28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy",
-  80: "Crime", 99: "Documentary", 18: "Drama", 10751: "Family",
-  14: "Fantasy", 36: "History", 27: "Horror", 10402: "Music",
-  9648: "Mystery", 10749: "Romance", 878: "Sci-Fi", 10770: "TV Movie",
-  53: "Thriller", 10752: "War", 37: "Western",
+  28: "Action",
+  12: "Adventure",
+  16: "Animation",
+  35: "Comedy",
+  80: "Crime",
+  99: "Documentary",
+  18: "Drama",
+  10751: "Family",
+  14: "Fantasy",
+  36: "History",
+  27: "Horror",
+  10402: "Music",
+  9648: "Mystery",
+  10749: "Romance",
+  878: "Sci-Fi",
+  10770: "TV Movie",
+  53: "Thriller",
+  10752: "War",
+  37: "Western",
 };
 
 const GRADIENTS = [
@@ -132,7 +146,10 @@ export default async function HomePage() {
               </Link>
             ) : (
               <>
-                <Link href="/sign-in" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link
+                  href="/sign-in"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Sign in
                 </Link>
                 <Link
@@ -161,15 +178,14 @@ export default async function HomePage() {
             </div>
 
             <h1 className="text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-              Discover films{" "}
-              <span className="text-primary">the way you</span>
+              Discover films <span className="text-primary">the way you</span>
               <br />
               think about them
             </h1>
 
             <p className="mx-auto max-w-xl text-base text-muted-foreground leading-relaxed">
-              Filter by country of origin. Sort by multiple fields at once. Rate and track
-              every film you've seen.
+              Filter by country of origin. Sort by multiple fields at once. Rate and track every
+              film you've seen.
             </p>
 
             <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
@@ -182,7 +198,10 @@ export default async function HomePage() {
                 <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
               {!session && (
-                <Link href="/sign-up" className="inline-flex items-center gap-2 rounded-lg border border-border bg-secondary px-7 py-3 text-sm font-semibold hover:bg-accent hover:border-primary/30 transition-all">
+                <Link
+                  href="/sign-up"
+                  className="inline-flex items-center gap-2 rounded-lg border border-border bg-secondary px-7 py-3 text-sm font-semibold hover:bg-accent hover:border-primary/30 transition-all"
+                >
                   Create free account
                 </Link>
               )}
@@ -217,9 +236,7 @@ export default async function HomePage() {
         {/* CTA strip */}
         <section className="border-t border-border bg-card">
           <div className="mx-auto max-w-4xl px-6 py-20 text-center space-y-5">
-            <h2 className="text-2xl font-bold sm:text-3xl">
-              Ready to find your next film?
-            </h2>
+            <h2 className="text-2xl font-bold sm:text-3xl">Ready to find your next film?</h2>
             <p className="text-muted-foreground text-sm">
               Filter by country · Sort by multiple fields · Rate every film you watch
             </p>
@@ -232,7 +249,10 @@ export default async function HomePage() {
                 Start browsing
               </Link>
               {!session && (
-                <Link href="/sign-up" className="inline-flex items-center rounded-lg border border-border bg-secondary px-7 py-3 text-sm font-semibold hover:bg-accent transition-colors">
+                <Link
+                  href="/sign-up"
+                  className="inline-flex items-center rounded-lg border border-border bg-secondary px-7 py-3 text-sm font-semibold hover:bg-accent transition-colors"
+                >
                   Create free account
                 </Link>
               )}
