@@ -6,7 +6,7 @@ import { type TmdbMovie, discoverPopularThisWeek, posterUrl } from "../../lib/tm
 const CACHE_KEY = "tmdb:popular-movies";
 const CACHE_TTL_SECONDS = 60 * 60 * 6; // 6 hours — weekly trending doesn't change minute to minute
 
-interface PopularMovie {
+export interface PopularMovie {
   tmdbId: number;
   title: string;
   originalTitle: string;

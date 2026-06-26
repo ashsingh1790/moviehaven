@@ -3,7 +3,6 @@ export type SortField =
   | "releaseDate"
   | "popularity"
   | "title"
-  | "userRating"
   | "budget"
   | "revenue";
 

@@ -1,4 +1,4 @@
-import Redis from "ioredis";
+import { Redis } from "ioredis";
 
 const redisUrl = process.env.REDIS_URL ?? "redis://localhost:6379";
 
@@ -7,6 +7,6 @@ export const redis = new Redis(redisUrl, {
   lazyConnect: true,
 });
 
-redis.on("error", err => {
+redis.on("error", (err: Error) => {
   console.error("[Redis] Connection error:", err);
 });
