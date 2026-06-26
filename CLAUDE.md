@@ -1,123 +1,76 @@
-# CLAUDE.md
+# CLAUDE.md — Movie Haven
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+> Root context for Claude Code. Kept intentionally **short**: gotchas and pointers only.
+> Per-directory `CLAUDE.md` files add local detail — Claude loads them additively as it descends.
+>
+> **Companion files** (open directly when needed — not loaded automatically):
+> - @README.md — project overview
+> - @.claude/docs/PRD.md — product requirements
+> - @.claude/docs/STORIES.md — user stories
+> - @.claude/docs/TESTING.md — test strategy and examples
+> - @.claude/settings.json — Claude Code permissions
 
-## Commands
+---
 
-```bash
-# Start all apps in dev mode
-pnpm dev
+## Critical gotchas
 
-# Run a single app/package
-pnpm --filter @movie-haven/web dev
-pnpm --filter @movie-haven/api dev
+1. **`@clerk/nextjs` is installed but NOT used for auth.** Auth is custom JWT via `jose`. Never call `auth()`, `currentUser()`, or any Clerk hook — the middleware and API context do their own JWT verification. The package exists from an earlier scaffold and has not been removed.
 
-# Build, lint, type-check (all run via Turborepo)
-pnpm build
-pnpm lint
-pnpm type-check
-pnpm format
+2. **`apps/web` has two tRPC clients — use the right one.** `src/lib/trpc/server.ts` (`serverTrpc`) is a plain HTTP client for Server Components and API route handlers. `src/lib/trpc/client.tsx` (`trpc`) is the TanStack Query-backed client for Client Components only. Using `serverTrpc` in a Client Component (or `trpc` in a Server Component) causes build errors or missing auth headers.
 
-# Testing (Test-Driven Development)
-pnpm test             # Run all tests (watch mode)
-pnpm test:unit        # Run unit tests once
-pnpm test:integration # Run integration tests once
-pnpm test:e2e         # Run end-to-end tests (Playwright)
-pnpm test:ui          # Open test UI dashboard
-pnpm test:coverage    # Check test coverage
-pnpm test:watch       # Run tests in watch mode
-pnpm test:debug       # Debug tests in browser
+3. **`JWT_SECRET` must be identical in both apps.** `apps/api/.env` and `apps/web/.env.local` both verify the same tokens with the same secret. A mismatch produces silent 401s on every protected call — nothing in the error message hints at a key mismatch.
 
-# Local infrastructure (Postgres + Redis via Docker)
-pnpm infra:up
-pnpm infra:down
-pnpm infra:reset      # wipes volumes
+4. **`@movie-haven/api` is a `devDependency` in `apps/web` — types only.** It is imported exclusively as `import type { AppRouter } from "@movie-haven/api"`. Never import a runtime value from it; the actual server runs separately on port 3001.
 
-# Database (Drizzle ORM)
-pnpm db:push          # push schema without migration file
-pnpm db:generate      # generate migration file
-pnpm db:migrate       # apply migrations
-pnpm db:studio        # Drizzle Studio UI
-```
+5. **Biome replaces both ESLint and Prettier.** Do not add `.eslintrc` files or run `prettier`. The single source of truth is `biome.json` at the repo root. Use `pnpm check` to lint + format-check, `pnpm format` to auto-fix formatting.
 
-Node 22+ and pnpm 9+ are required (see `.nvmrc`).
+6. **Film filter state is URL-synced via nuqs, not React state.** `apps/web/src/hooks/use-film-filters.ts` reads and writes URL search params. Do not introduce a parallel `useState` for the same filters — it will desync from the URL on navigation.
 
-## Architecture
+---
 
-This is a **pnpm + Turborepo monorepo** with two apps and four packages.
+## Codebase map
 
-### Apps
+| Path | What lives here |
+|------|-----------------|
+| `apps/api/` | Fastify 5 + tRPC v11 server; port 3001. See `apps/api/CLAUDE.md`. |
+| `apps/web/` | Next.js 15 App Router; port 3000. See `apps/web/CLAUDE.md`. |
+| `packages/db/` | Drizzle ORM schema + Postgres client (`@movie-haven/db`). See `packages/db/CLAUDE.md`. |
+| `packages/types/` | Shared TypeScript types: `Film`, `FilmCard`, `User`, `FilmSearchParams` (`@movie-haven/types`). |
+| `packages/ui/` | Shared shadcn/ui components: Button, Badge, Card, Slider, etc. (`@movie-haven/ui`). |
+| `packages/config/` | Shared tsconfig presets and Biome config (`@movie-haven/config`). |
+| `.claude/docs/` | PRD, user stories, testing guide, implementation audit. Not auto-loaded. |
+| `plans/` | Iterative-planner artifacts (findings, decisions, changelogs). Not auto-loaded. |
 
-**`apps/api`** — Fastify 5 HTTP server running tRPC v11. Exports `AppRouter` as a TypeScript type (used by the web app for end-to-end type safety). Entry point: `src/index.ts`. Runs on port 3001.
+---
 
-- tRPC router: `src/trpc/router.ts` — combines `auth`, `films`, `users`, `lists`, `tmdb` sub-routers
-- Context (`src/trpc/context.ts`): provides `db`, `redis`, and `userId` (extracted from Bearer JWT) to every procedure
-- `publicProcedure` / `protectedProcedure` defined in `src/trpc/init.ts` — protected procedures throw UNAUTHORIZED if `userId` is null
+## Build & test commands
 
-**`apps/web`** — Next.js 15 App Router. Runs on port 3000.
+| Scope | Dev | Type-check | Lint/format |
+|-------|-----|------------|-------------|
+| API only | `pnpm --filter @movie-haven/api dev` | `pnpm --filter @movie-haven/api type-check` | `pnpm --filter @movie-haven/api lint` |
+| Web only | `pnpm --filter @movie-haven/web dev` | `pnpm --filter @movie-haven/web type-check` | `pnpm --filter @movie-haven/web lint` |
+| All apps | `pnpm dev` | `pnpm type-check` | `pnpm check` |
+| DB migrations | — | — | `pnpm db:push` (dev) · `pnpm db:migrate` (prod) |
+| Local infra | `pnpm infra:up` | — | `pnpm infra:down` · `pnpm infra:reset` |
 
-- Route groups: `(auth)` for sign-in/sign-up, `(main)` for authenticated app
-- Next.js middleware (`src/middleware.ts`): verifies JWT cookie at the edge; redirects unauthenticated users to `/sign-in`
-- Two tRPC clients:
-  - `src/lib/trpc/server.ts` — plain HTTP client for Server Components and API routes (no React Query)
-  - `src/lib/trpc/client.tsx` + `provider.tsx` — TanStack Query-backed client for Client Components
-- Auth state: `AuthProvider` (`src/contexts/auth-context.tsx`) is hydrated server-side in `layout.tsx` via `serverTrpc.auth.me`
-- Film filter state is URL-synced via **nuqs** (`src/hooks/use-film-filters.ts`)
+Whole-repo `pnpm dev` starts both apps concurrently via Turborepo. Infra (Postgres + Redis) must be running first.
 
-### Packages
+---
 
-| Package | Purpose |
-|---|---|
-| `@movie-haven/db` | Drizzle ORM schema + client. Tables: `users`, `films`, `ratings`, `lists`, `listItems`, `streamingAvailability` |
-| `@movie-haven/types` | Shared TypeScript types: `Film`, `FilmCard`, `User`, `FilmSearchParams`, `SortChip`, `SearchResult` |
-| `@movie-haven/ui` | Shared shadcn/ui components (Button, Badge, Card, Slider, etc.) |
-| `@movie-haven/config` | Shared tsconfig presets and ESLint 9 flat configs |
+## Naming conventions
 
-### Auth flow
+- **Files:** kebab-case (`film-card.tsx`, `use-film-filters.ts`)
+- **Types / interfaces:** PascalCase (`FilmCard`, `AppRouter`)
+- **Functions / variables:** camelCase (`serverTrpc`, `createContext`)
+- **React components:** PascalCase filename, matching export (`FilmCard.tsx → export function FilmCard`)
+- **Tests:** `*.test.ts` / `*.test.tsx` co-located with the file under test
 
-Auth uses **custom JWT** (via `jose`), not Clerk (the package is installed but not wired into auth logic).
+Formatter (Biome) enforces formatting. Naming is enforced by code review.
 
-1. Web API routes (`/api/auth/login`, `/api/auth/register`) call the tRPC API server-side and receive a JWT
-2. JWT is set as a cookie (`movie_haven_session`) by the Next.js route handler
-3. Middleware reads and verifies the cookie on every request
-4. Client-side tRPC reads the cookie and forwards it as a `Authorization: Bearer` header to the API
-5. API context extracts `userId` from the Bearer token for protected procedures
+---
 
-### Testing Strategy (Test-Driven Development)
-
-Movie Haven uses **TDD (Test-Driven Development)**:
-1. **Write tests first** (RED phase) — test will fail
-2. **Write minimal code** (GREEN phase) — make test pass
-3. **Refactor** (REFACTOR phase) — improve code while tests stay green
-
-**Test Coverage:**
-- **Unit tests** (60%) — Individual functions in isolation (Vitest)
-- **Integration tests** (30%) — APIs with real DB (Vitest + test database)
-- **E2E tests** (10%) — User flows in browser (Playwright)
-
-**Coverage Targets:**
-- Auth routes: 90%
-- Recommendation engine: 85%
-- Films API: 80%
-- Overall: 80% minimum
-
-See [TESTING.md](./TESTING.md) for detailed guide, examples, and best practices.
-
-### Data sources
-
-- **TMDB API** (`apps/api/src/lib/tmdb.ts`): film metadata seeding. Requires `TMDB_READ_ACCESS_TOKEN`.
-- **Redis** (`apps/api/src/lib/redis.ts`): caching layer (streaming availability cache TTL ~24h planned).
-
-## Environment Setup
-
-Copy `.env.example` files and fill in values:
-
-- `apps/api/.env`: `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`, `TMDB_READ_ACCESS_TOKEN`, `ALLOWED_ORIGINS`
-- `apps/web/.env.local`: `NEXT_PUBLIC_API_URL`, `JWT_SECRET`
-
-The `JWT_SECRET` must match between `apps/api` and `apps/web` — both verify the same tokens.
-
-Local defaults (with Docker infra running):
-- `DATABASE_URL=postgresql://postgres:password@localhost:5432/movie_haven`
-- `REDIS_URL=redis://localhost:6379`
-- `NEXT_PUBLIC_API_URL=http://localhost:3001`
+<!--
+Maintenance:
+- Last reviewed: 2026-06-25
+- Reviewed against model: claude-sonnet-4-6
+-->
