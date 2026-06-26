@@ -34,7 +34,8 @@ await server.register(fastifyTRPCPlugin, {
 
 server.get("/health", async () => ({ status: "ok", timestamp: new Date().toISOString() }));
 
-const port = Number(process.env.API_PORT ?? 3001);
+// Render (and most PaaS) inject PORT; fall back to API_PORT for local dev.
+const port = Number(process.env.PORT ?? process.env.API_PORT ?? 3001);
 const host = process.env.HOST ?? "0.0.0.0";
 
 try {
