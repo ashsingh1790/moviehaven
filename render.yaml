@@ -1,0 +1,36 @@
+# Render Blueprint — provisions the Movie Haven API as a free web service.
+# Docs: https://render.com/docs/blueprint-spec
+#
+# After connecting this repo as a Blueprint in the Render dashboard, set the
+# secret env vars (DATABASE_URL, REDIS_URL, JWT_SECRET, TMDB_READ_ACCESS_TOKEN,
+# ALLOWED_ORIGINS) — they are marked `sync: false` so Render prompts for them.
+services:
+  - type: web
+    name: movie-haven-api
+    runtime: node
+    plan: free
+    region: oregon
+    branch: main
+    # Build context is the repo root so pnpm can resolve the workspace.
+    buildCommand: corepack enable && pnpm install --frozen-lockfile
+    # Run via tsx (resolves the raw .ts workspace packages, same as dev).
+    startCommand: pnpm --filter @movie-haven/api start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # The web origin(s) allowed by CORS — set to your Vercel URL.
+      - key: ALLOWED_ORIGINS
+        sync: false
+      # Neon POOLED connection string, including ?sslmode=require
+      - key: DATABASE_URL
+        sync: false
+      # Upstash TLS URL (rediss://...)
+      - key: REDIS_URL
+        sync: false
+      # Must match apps/web JWT_SECRET exactly
+      - key: JWT_SECRET
+        sync: false
+      # TMDB v4 read access token
+      - key: TMDB_READ_ACCESS_TOKEN
+        sync: false
