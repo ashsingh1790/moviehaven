@@ -18,7 +18,7 @@
   },
   "devDependencies": {
     "@movie-haven/config": "workspace:*",
-    "@types/node": "^22.0.0",
+    "@types/node": "^26.0.0",
     "drizzle-kit": "^0.30.0",
     "typescript": "^5.8.3"
   }

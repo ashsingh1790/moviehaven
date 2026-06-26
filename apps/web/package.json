@@ -32,7 +32,7 @@
     "@movie-haven/api": "workspace:*",
     "@movie-haven/config": "workspace:*",
     "@tailwindcss/postcss": "^4.0.9",
-    "@types/node": "^22.0.0",
+    "@types/node": "^26.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "tailwindcss": "^4.0.9",
