@@ -117,8 +117,8 @@ export function FiltersDrawer({ open, onClose }: FiltersDrawerProps) {
               max={new Date().getFullYear()}
               value={[filters.minYear ?? 1900, filters.maxYear ?? new Date().getFullYear()]}
               onChange={([min, max]) => {
-                setFilter("minYear", min === 1900 ? undefined : min);
-                setFilter("maxYear", max === new Date().getFullYear() ? undefined : max);
+                setFilter("minYear", min === 1900 ? null : min);
+                setFilter("maxYear", max === new Date().getFullYear() ? null : max);
               }}
             />
 
@@ -131,8 +131,8 @@ export function FiltersDrawer({ open, onClose }: FiltersDrawerProps) {
               step={0.5}
               value={[filters.minTmdbScore ?? 0, filters.maxTmdbScore ?? 10]}
               onChange={([min, max]) => {
-                setFilter("minTmdbScore", min === 0 ? undefined : min);
-                setFilter("maxTmdbScore", max === 10 ? undefined : max);
+                setFilter("minTmdbScore", min === 0 ? null : min);
+                setFilter("maxTmdbScore", max === 10 ? null : max);
               }}
             />
 

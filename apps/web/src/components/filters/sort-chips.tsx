@@ -7,7 +7,6 @@ const SORT_OPTIONS: { field: SortField; label: string }[] = [
   { field: "tmdbScore", label: "TMDB Score" },
   { field: "releaseDate", label: "Release Date" },
   { field: "popularity", label: "Popularity" },
-  { field: "userRating", label: "My Rating" },
   { field: "title", label: "Title" },
   { field: "revenue", label: "Box Office" },
 ];
