@@ -36,3 +36,7 @@ drizzle/
 
 # Claude Code local settings
 .claude/
+plans/
+
+# Local scratch notes
+notes.txt
