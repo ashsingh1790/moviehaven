@@ -127,6 +127,8 @@ When the user corrects a mistake you made:
 
 6. **Film filter state is URL-synced via nuqs, not React state.** `apps/web/src/hooks/use-film-filters.ts` reads and writes URL search params. Do not introduce a parallel `useState` for the same filters — it will desync from the URL on navigation.
 
+7. **Tickets live in GitHub Issues (`ashsingh1790/moviehaven`), not local files.** Open Phase 1 stories are issues #7–#13; spikes are #14+. Label taxonomy: `status:{backlog,ready,in-progress,review,done}`, `phase:{1-5}`, `type:{feature,bug,spike,chore}`. Agent ticket lifecycle: label `status:in-progress` → branch `feature/{issue#}-slug` → PR body `Closes #{N}` → label automation handles the rest. Use the `gh` CLI (already in `settings.json` allowlist).
+
 ---
 
 ## Codebase map
@@ -145,6 +147,7 @@ When the user corrects a mistake you made:
 | `.claude/docs/` | Harness procedures: setup checklist, LSP setup, maintenance guide. Not auto-loaded. |
 | `plans/` | Iterative-planner artifacts (findings, decisions, changelogs). Not auto-loaded. |
 | `.deepsec/` | Deepsec security scanner workspace (config, `data/`, findings). Should be a **single root workspace** managing both apps as projects — do not create per-app `.deepsec/` dirs. Skill reference: `~/dev/AI_Projects/ai-labs-pro/deepsec`. |
+| `.github/` | CI workflows (`ci.yml`, `pr-labels.yml`, `release.yml`) and issue templates (story, bug, spike). |
 
 ---
 
