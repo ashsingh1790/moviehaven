@@ -20,7 +20,9 @@
     "db:push": "pnpm --filter @movie-haven/db push",
     "db:generate": "pnpm --filter @movie-haven/db generate",
     "db:migrate": "pnpm --filter @movie-haven/db migrate",
-    "db:studio": "pnpm --filter @movie-haven/db studio"
+    "db:studio": "pnpm --filter @movie-haven/db studio",
+    "okf:build": "pnpm --filter @movie-haven/api okf:build",
+    "okf:validate": "python3 \"${OKF_CONVERT:-/Users/sanjeevani/dev/AI_Projects/ai-labs-pro/okf/skills/markdown-to-okf/scripts/okf_convert.py}\" validate --bundle docs/okf"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",

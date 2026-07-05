@@ -11,12 +11,14 @@
     "build": "tsc",
     "start": "tsx src/index.ts",
     "type-check": "tsc --noEmit",
-    "lint": "biome lint --write ."
+    "lint": "biome lint --write .",
+    "okf:build": "tsx scripts/okf-build.ts"
   },
   "dependencies": {
     "@fastify/cors": "^10.0.2",
     "@fastify/rate-limit": "^10.2.1",
     "@movie-haven/db": "workspace:*",
+    "@movie-haven/okf": "workspace:*",
     "@movie-haven/types": "workspace:*",
     "@trpc/server": "^11.0.0",
     "bcryptjs": "^3.0.3",

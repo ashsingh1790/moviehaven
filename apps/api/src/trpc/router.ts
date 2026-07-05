@@ -1,9 +1,10 @@
 import { router } from "./init";
+import { authRouter } from "./routers/auth";
+import { exportRouter } from "./routers/export";
 import { filmsRouter } from "./routers/films";
 import { listsRouter } from "./routers/lists";
-import { usersRouter } from "./routers/users";
 import { tmdbRouter } from "./routers/tmdb";
-import { authRouter } from "./routers/auth";
+import { usersRouter } from "./routers/users";
 
 export const appRouter = router({
   auth: authRouter,
@@ -11,6 +12,7 @@ export const appRouter = router({
   users: usersRouter,
   lists: listsRouter,
   tmdb: tmdbRouter,
+  export: exportRouter,
 });
 
 export type AppRouter = typeof appRouter;
