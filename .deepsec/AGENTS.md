@@ -19,7 +19,7 @@ asked to set a project up.
 ## Reference
 
 Use the **curated deepsec skill** at
-`/Users/sanjeevani/dev/AI_Projects/MovieHaven/.claude/skills/deepsec/SKILL.md`
+`.claude/skills/deepsec/SKILL.md` (relative to project root)
 in preference to the raw npm skill. It includes cost-safety guardrails,
 calibration steps, and bundled helper scripts not present in the npm package.
 

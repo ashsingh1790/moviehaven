@@ -37,6 +37,7 @@ drizzle/
 # Claude Code local settings
 .claude/
 plans/
+skills-lock.json
 
 # Local scratch notes
 notes.txt
