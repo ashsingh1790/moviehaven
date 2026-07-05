@@ -40,3 +40,7 @@ plans/
 
 # Local scratch notes
 notes.txt
+
+# OKF: generated HTML visualization + conversion scratch (bundle itself is committed)
+docs/okf/.visualize/
+.okf-conversion-report.json

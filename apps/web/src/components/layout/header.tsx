@@ -1,15 +1,39 @@
 "use client";
 
-import Link from "next/link";
-import { Film, LogOut, User } from "lucide-react";
-import { Button } from "@movie-haven/ui";
 import { useAuth } from "@/contexts/auth-context";
-import { useState, useRef, useEffect } from "react";
+import { trpc } from "@/lib/trpc/client";
+import { Button } from "@movie-haven/ui";
+import JSZip from "jszip";
+import { Download, Film, LogOut, User } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 
 export function Header() {
   const { user, logout } = useAuth();
+  const utils = trpc.useUtils();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  async function handleExport() {
+    setExporting(true);
+    try {
+      // Fetch the validated OKF bundle, zip it in the browser, and download.
+      const { files } = await utils.export.myLibraryOkf.fetch();
+      const zip = new JSZip();
+      for (const [path, content] of Object.entries(files)) zip.file(path, content);
+      const blob = await zip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "movie-haven-library-okf.zip";
+      link.click();
+      URL.revokeObjectURL(url);
+      setMenuOpen(false);
+    } finally {
+      setExporting(false);
+    }
+  }
 
   useEffect(() => {
     function handler(e: MouseEvent) {
@@ -64,6 +88,15 @@ export function Header() {
                     <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                   </div>
                   <div className="p-1">
+                    <button
+                      type="button"
+                      onClick={handleExport}
+                      disabled={exporting}
+                      className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent transition-colors text-left disabled:opacity-50"
+                    >
+                      <Download className="h-4 w-4" />
+                      {exporting ? "Exporting…" : "Export library (OKF)"}
+                    </button>
                     <button
                       onClick={() => {
                         setMenuOpen(false);

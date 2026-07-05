@@ -6,9 +6,11 @@ Drizzle ORM schema + Postgres client. Imported as `@movie-haven/db`. Only `apps/
 
 1. **Schema changes require a migration step before they take effect.** After editing any file in `src/schema/`, run `pnpm db:push` (dev, applies directly) or `pnpm db:generate` then `pnpm db:migrate` (prod, generates SQL files). Skipping this leaves the Postgres schema out of sync with TypeScript types.
 
-2. **`db` is a singleton — it throws at import if `DATABASE_URL` is not set.** The client in `src/client.ts` calls `drizzle()` at module load time. Any test or script that imports `@movie-haven/db` without a valid `DATABASE_URL` in env will crash immediately.
+2. **`db` is a singleton — it throws at import if `DATABASE_URL` is not set.** The client in `src/client.ts` calls `drizzle()` at module load time. Any test or script that imports `@movie-haven/db` without a valid `DATABASE_URL` in env will crash immediately. Connection is lazy, so a script that only introspects table *shapes* (e.g. `getTableConfig`) can set a throwaway placeholder `DATABASE_URL` before importing — it never actually connects.
 
 3. **`apps/web` does NOT import `@movie-haven/db`.** All DB access goes through `apps/api` over tRPC. If you find yourself adding `@movie-haven/db` as a dependency in `apps/web`, stop — use a tRPC procedure instead.
+
+4. **`jsonb` columns with `.default([])` are still nullable in the inferred type.** A default does not imply `.notNull()`, so `$inferSelect` types `films.genres`, `directors`, `cast`, etc. as `T | null`. Guard with `?? []` when reading — TS `noUncheckedIndexedAccess` will flag it otherwise.
 
 ## Schema tables
 
