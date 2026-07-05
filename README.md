@@ -91,6 +91,10 @@ pnpm format                     # Format code
 pnpm infra:up                   # Start Postgres + Redis
 pnpm infra:down                 # Stop infrastructure
 pnpm infra:reset                # Wipe volumes (⚠️ destructive)
+
+# OKF knowledge catalog (run after schema or router changes)
+pnpm okf:build                  # Regenerate docs/okf/ from live schema + routers
+pnpm okf:validate               # Validate docs/okf/ conformance (Python, independent check)
 ```
 
 ---
