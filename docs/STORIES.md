@@ -8,9 +8,9 @@ This document breaks down Movie Haven features into granular user stories. Each 
 
 ## Phase 1: Landing Page & Authentication (MVP)
 
-**Phase Goal:** Functional landing page with curated lists, auth system with username support, and demo profile showcase  
-**Estimated Duration:** 2 weeks  
-**Status:** 🟢 In Progress (~80% complete)
+**Phase Goal:** Functional landing page with curated lists, auth system with username support, demo profile showcase, and shadcn/ui component foundation  
+**Estimated Duration:** 3 weeks  
+**Status:** 🟢 In Progress (~65% complete)
 
 ---
 
@@ -578,6 +578,264 @@ pnpm --filter @movie-haven/api seed:demo
 - `apps/web/src/app/(main)/layout.tsx` — Refine navigation
 - `apps/web/src/app/(main)/films/page.tsx` — Already done ✅
 - `apps/api/src/trpc/routers/auth.ts` — auth.me query ✅
+
+---
+
+### Feature: shadcn/ui Migration
+
+**Context:** The UI currently uses Tailwind v4 with OKLCH design tokens and several hand-rolled components (slide-in drawer, dropdown menus, sort popovers, form inputs) that reinvent Radix primitives. The `shadcn` CLI (v4.13) is installed but never initialized. This migration adds a proper `components.json`, replaces every hand-rolled component with the shadcn equivalent, and preserves the existing visual design exactly. All Radix packages are already installed; this is mostly wiring and replacement work.
+
+**Key constraint:** Visual output must be identical before and after. This is an internal quality migration, not a redesign.
+
+---
+
+#### Story 1.13: Initialize shadcn CLI and Register Existing Components
+
+**Description:** Run `shadcn init` for Tailwind v4, create `components.json`, and register the 7 existing `packages/ui` components so the CLI can manage them going forward.
+
+**Status:** 🟡 PENDING
+
+**Acceptance Criteria:**
+- [ ] `apps/web/components.json` created with correct paths pointing at `packages/ui/src/components/`
+- [ ] Tailwind v4 style selected (`--style default`, CSS variables mode)
+- [ ] Existing OKLCH token system (`globals.css @theme` block) preserved — no token values changed
+- [ ] Custom tokens (`--color-gold`, `--color-gold-dim`, `--color-gold-bg`, `--color-streaming-dot`) preserved
+- [ ] All 7 existing components (Button, Badge, Card, ScrollArea, Separator, Slider, Tooltip) registered in `components.json`
+- [ ] `shadcn add <component>` works without error (verified by adding one new component)
+- [ ] `pnpm type-check` and `pnpm lint` pass
+
+**Technical Details:**
+
+**Init command:**
+```bash
+cd apps/web && pnpm shadcn init
+```
+- Style: `default`
+- Base color: do not overwrite — existing OKLCH tokens are already correct
+- Components path: `../../packages/ui/src/components` (monorepo path)
+- Utils path: `../../packages/ui/src/lib/utils`
+
+**Gotcha — Tailwind v4:** shadcn v4.13 supports Tailwind v4 natively. The `@theme` block syntax in `globals.css` maps directly to shadcn's CSS variable expectations. Do NOT run with `--legacy` flag.
+
+**Gotcha — Badge `gold` variant:** The existing `Badge` component has a custom `gold` variant not in stock shadcn. It must be preserved when registering. Do not overwrite the file.
+
+**Affected Files:**
+- `apps/web/components.json` (new)
+- `apps/web/src/app/globals.css` (verify, must not change token values)
+
+**Dependencies:** None
+
+**Definition of Done:**
+- [ ] `components.json` present and valid
+- [ ] `shadcn add input` installs successfully to `packages/ui`
+- [ ] No type errors, no lint errors
+
+---
+
+#### Story 1.14: Add Input + Label Components; Replace All Raw Form Inputs
+
+**Description:** Add `Input` and `Label` shadcn components to `packages/ui`, then replace every raw `<input>` and `<label>` in the app with them.
+
+**Status:** 🟡 PENDING
+
+**Acceptance Criteria:**
+- [ ] `Input` component added to `packages/ui/src/components/input.tsx`
+- [ ] `Label` component added to `packages/ui/src/components/label.tsx`
+- [ ] Raw `<input>` replaced in:
+  - `apps/web/src/app/(auth)/sign-in/page.tsx`
+  - `apps/web/src/app/(auth)/sign-up/page.tsx`
+  - `apps/web/src/components/filters/country-filter.tsx` (inline search)
+- [ ] Raw `<label>` replaced with `Label` in sign-in and sign-up forms
+- [ ] Visual appearance identical (same sizing, border, focus ring color = gold `--color-ring`)
+- [ ] `pnpm type-check` passes
+
+**Technical Details:**
+
+**Install:**
+```bash
+cd apps/web && pnpm shadcn add input label
+```
+
+**Usage pattern:**
+```tsx
+import { Input } from "@movie-haven/ui"
+import { Label } from "@movie-haven/ui"
+```
+
+**Gotcha:** The existing sign-in/sign-up forms apply custom focus styles (`focus:ring-gold`). The shadcn `Input` uses `ring-ring` which maps to `--color-ring` — already set to gold in `globals.css`. No extra CSS needed.
+
+**Affected Files:**
+- `packages/ui/src/components/input.tsx` (new)
+- `packages/ui/src/components/label.tsx` (new)
+- `packages/ui/index.ts` — export Input, Label
+- `apps/web/src/app/(auth)/sign-in/page.tsx`
+- `apps/web/src/app/(auth)/sign-up/page.tsx`
+- `apps/web/src/components/filters/country-filter.tsx`
+
+**Dependencies:** Story 1.13 (shadcn initialized) ✅
+
+**Definition of Done:**
+- [ ] All raw inputs replaced
+- [ ] Forms look identical in browser
+- [ ] No regressions on sign-in / sign-up flows
+
+---
+
+#### Story 1.15: Add DropdownMenu; Replace Hand-Rolled Header User Menu
+
+**Description:** Add the `DropdownMenu` shadcn component and replace the header's hand-rolled mousedown-listener dropdown with the Radix-backed equivalent.
+
+**Status:** 🟡 PENDING
+
+**Acceptance Criteria:**
+- [ ] `DropdownMenu` added to `packages/ui/src/components/dropdown-menu.tsx`
+- [ ] `apps/web/src/components/layout/header.tsx` refactored:
+  - Remove `menuRef` + `useEffect` mousedown listener
+  - Replace with `DropdownMenu`, `DropdownMenuTrigger`, `DropdownMenuContent`, `DropdownMenuItem`
+- [ ] Menu items: Profile (placeholder), Settings (placeholder), Logout
+- [ ] Visual appearance identical — avatar trigger, same positioning, same background (`--color-popover`)
+- [ ] Keyboard accessible (Escape closes, arrow keys navigate)
+- [ ] `pnpm type-check` passes
+
+**Technical Details:**
+
+**Install:**
+```bash
+cd apps/web && pnpm shadcn add dropdown-menu
+```
+
+**Current implementation to remove:** `header.tsx` lines using `menuRef`, `setMenuOpen`, `useEffect` with `mousedown` listener — replace entirely with Radix `DropdownMenu`.
+
+**Radix package:** `@radix-ui/react-dropdown-menu` is already installed in `packages/ui/package.json`. shadcn just wraps it.
+
+**Affected Files:**
+- `packages/ui/src/components/dropdown-menu.tsx` (new)
+- `packages/ui/index.ts` — export DropdownMenu parts
+- `apps/web/src/components/layout/header.tsx`
+
+**Dependencies:** Story 1.13
+
+**Definition of Done:**
+- [ ] No `mousedown` event listener in header
+- [ ] Keyboard navigation works
+- [ ] Visual output identical
+
+---
+
+#### Story 1.16: Add Sheet; Replace Hand-Rolled FiltersDrawer
+
+**Description:** Add the `Sheet` shadcn component and replace the mobile filters drawer's hand-rolled CSS `translate-x` slide animation.
+
+**Status:** 🟡 PENDING
+
+**Acceptance Criteria:**
+- [ ] `Sheet` component added to `packages/ui/src/components/sheet.tsx`
+- [ ] `apps/web/src/components/filters/filters-drawer.tsx` refactored:
+  - Remove manual `translate-x`, backdrop div, `body.style.overflow` lock, Escape key handler
+  - Replace with `Sheet`, `SheetTrigger`, `SheetContent`, `SheetHeader`
+- [ ] Drawer slides in from the right (same as current)
+- [ ] Backdrop/overlay present and dismisses on click
+- [ ] Body scroll locked while drawer open
+- [ ] Escape key closes drawer
+- [ ] Mobile only (visible < lg breakpoint — same as current)
+- [ ] `pnpm type-check` passes
+
+**Technical Details:**
+
+**Install:**
+```bash
+cd apps/web && pnpm shadcn add sheet
+```
+
+**Note:** `Sheet` is built on `@radix-ui/react-dialog` (already installed). It handles overlay, scroll-lock, and keyboard dismiss natively.
+
+**Affected Files:**
+- `packages/ui/src/components/sheet.tsx` (new)
+- `packages/ui/index.ts` — export Sheet parts
+- `apps/web/src/components/filters/filters-drawer.tsx`
+
+**Dependencies:** Story 1.13
+
+**Definition of Done:**
+- [ ] No manual translate/backdrop/overflow code in FiltersDrawer
+- [ ] Drawer opens/closes correctly on mobile
+- [ ] Escape and backdrop-click dismiss
+
+---
+
+#### Story 1.17: Add Popover + Command; Replace SortChips "Add Sort" Hack
+
+**Description:** Add `Popover` and `Command` shadcn components and replace the CSS `group-hover:block` hack in SortChips with a proper accessible popover.
+
+**Status:** 🟡 PENDING
+
+**Acceptance Criteria:**
+- [ ] `Popover` added to `packages/ui/src/components/popover.tsx`
+- [ ] `Command` added to `packages/ui/src/components/command.tsx`
+- [ ] `apps/web/src/components/filters/sort-chips.tsx` refactored:
+  - Remove CSS `group-hover:block` / `group` trick for "Add sort" dropdown
+  - Replace with `Popover` + `PopoverTrigger` + `PopoverContent` containing a `Command` list
+- [ ] Visual appearance same — "Add sort +" button opens a small popover with field options
+- [ ] Click outside or Escape closes popover
+- [ ] Keyboard accessible
+- [ ] `pnpm type-check` passes
+
+**Technical Details:**
+
+**Install:**
+```bash
+cd apps/web && pnpm shadcn add popover command
+```
+
+**Affected Files:**
+- `packages/ui/src/components/popover.tsx` (new)
+- `packages/ui/src/components/command.tsx` (new)
+- `packages/ui/index.ts` — export Popover + Command parts
+- `apps/web/src/components/filters/sort-chips.tsx`
+
+**Dependencies:** Story 1.13
+
+**Definition of Done:**
+- [ ] No `group-hover` CSS trick in sort-chips
+- [ ] Popover opens/closes reliably
+- [ ] Sort fields selectable from popover
+
+---
+
+#### Story 1.18: Add Pagination; Replace Hand-Rolled Films Pagination
+
+**Description:** Add the `Pagination` shadcn component and replace the hand-rolled pagination controls on the `/films` page.
+
+**Status:** 🟡 PENDING
+
+**Acceptance Criteria:**
+- [ ] `Pagination` added to `packages/ui/src/components/pagination.tsx`
+- [ ] Films page pagination refactored to use `Pagination`, `PaginationContent`, `PaginationItem`, `PaginationLink`, `PaginationPrevious`, `PaginationNext`, `PaginationEllipsis`
+- [ ] Visual appearance same — prev/next arrows + page numbers with current page highlighted in gold
+- [ ] Keyboard accessible
+- [ ] URL-synced page state preserved (via `nuqs`)
+- [ ] `pnpm type-check` passes
+
+**Technical Details:**
+
+**Install:**
+```bash
+cd apps/web && pnpm shadcn add pagination
+```
+
+**Note:** shadcn `Pagination` is pure HTML — no Radix primitive. It uses `<nav>` + `<a>` elements styled with Tailwind. The active page highlight should use `--color-primary` (gold) to match the existing design.
+
+**Affected Files:**
+- `packages/ui/src/components/pagination.tsx` (new)
+- `packages/ui/index.ts` — export Pagination parts
+- `apps/web/src/app/(main)/films/page.tsx` (or pagination subcomponent)
+
+**Dependencies:** Story 1.13
+
+**Definition of Done:**
+- [ ] Hand-rolled pagination removed
+- [ ] shadcn Pagination renders correctly
+- [ ] Page navigation works; URL updates
 
 ---
 
