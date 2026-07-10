@@ -127,7 +127,7 @@ When the user corrects a mistake you made:
 
 6. **Film filter state is URL-synced via nuqs, not React state.** `apps/web/src/hooks/use-film-filters.ts` reads and writes URL search params. Do not introduce a parallel `useState` for the same filters — it will desync from the URL on navigation.
 
-7. **Tickets live in GitHub Issues (`ashsingh1790/moviehaven`), not local files.** Open Phase 1 stories are issues #7–#13; spikes are #14+. Label taxonomy: `status:{backlog,ready,in-progress,review,done}`, `phase:{1-5}`, `type:{feature,bug,spike,chore}`. Agent ticket lifecycle: label `status:in-progress` → branch `feature/{issue#}-slug` → PR body `Closes #{N}` → label automation handles the rest. Use the `gh` CLI (already in `settings.json` allowlist).
+7. **Tickets live in GitHub Issues (`ashsingh1790/moviehaven`), not local files.** Phase 1 is now the **groundwork** phase — the agentic-harness foundation, issues #21–#53 (`GW-A1`…`GW-E6`); feature stories #7–#13 moved to the **Phase 2** milestone. Label taxonomy: `status:{backlog,ready,in-progress,review,done,blocked}`, `phase:{1-5}`, `type:{feature,bug,spike,chore}`, `area:{harness,agents,testing,security,frontend}`. Agent ticket lifecycle: label `status:in-progress` → branch `feature/{issue#}-slug` → PR body `Closes #{N}` → label automation handles the rest. Use the `gh` CLI (already in `settings.json` allowlist).
 
 ---
 

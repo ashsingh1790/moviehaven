@@ -6,11 +6,223 @@ This document breaks down Movie Haven features into granular user stories. Each 
 
 ---
 
-## Phase 1: Landing Page & Authentication (MVP)
+## Phase 1: Foundations & Agentic Dev Harness (Groundwork)
 
-**Phase Goal:** Functional landing page with curated lists, auth system with username support, demo profile showcase, and shadcn/ui component foundation  
-**Estimated Duration:** 3 weeks  
-**Status:** 🟢 In Progress (~65% complete)
+**Phase Goal (REVISED):** Lay the foundations that must exist before feature development can run through an autonomous agentic harness. This covers the harness + orchestration, six specialized agents (frontend coder, backend coder, test author, security reviewer, PR reviewer, orchestrator), an E2E + unit testing foundation for both frontend and backend, security guardrails (OWASP Top 10 for FE, hardening for BE), and frontend quality gates (Lighthouse budgets, cross-browser, accessibility, mobile responsiveness). These groundwork tickets are worked **manually**; full autonomy is the *target* for later feature work. The already-built landing page, auth, JWT middleware, and logout (Stories 1.1, 1.5–1.8) remain part of Phase 1. Feature stories (TMDB lists 1.2–1.4, demo/seed/protected-films 1.9–1.12) have **moved to Phase 2**. The shadcn/ui migration (1.13–1.18) stays in Phase 1 as UI groundwork.  
+**Estimated Duration:** 4–5 weeks  
+**Status:** 🟢 In Progress — auth/landing done; groundwork (GW-A1…GW-E6) newly added
+
+> **Scope change note:** Phase 1 was repurposed from feature work to groundwork via a stochastic multi-agent consensus analysis (10 agents, median confidence 7/10). Tickets live in GitHub Issues (source of truth); the milestone assignment there is authoritative. See the **Feature: Phase 1 Groundwork** section below.
+
+---
+
+### Feature: Phase 1 Groundwork — Autonomous Agentic Dev Harness
+
+**Context:** Feature development for Movie Haven is meant to run through an autonomous agentic harness (pick ticket → code → commit/push → PR → review/approve → close). None of the scaffolding that makes that safe or *verifiable* exists yet: CI runs zero real tests, there is one generic coder agent, no E2E, no CSP/security headers, and `.deepsec/` is configured but unwired. These 33 groundwork tickets build that foundation. They are worked **manually**. Structure is **spike-then-build**: a `[Spike]` produces a decision/recommendation doc; a `[Build]` produces working config/code plus a passing check. Everything targets **free tier**.
+
+**Ticket IDs** use `GW-<theme><n>` (A=harness, B=agents, C=testing, D=security, E=frontend quality) and map 1:1 to GitHub Issues. Dependencies reference other GW IDs.
+
+#### GW-A1 · [Spike] Autonomy Runtime Selection
+**Status:** 🟡 PENDING · **Deps:** none · **Labels:** `type:spike, area:harness`
+Decide where the future feature-dev loop runs: local orchestrator vs GitHub Actions vs hybrid — the mandated first ticket; all harness-build tickets depend on its outcome.
+- [ ] Compare local long-running orchestrator, GitHub Actions–triggered, and hybrid against free-tier limits (Actions minutes, always-on cost, API budget)
+- [ ] Recommendation doc with chosen runtime + rationale + rough cost model
+- [ ] Identify what each downstream harness ticket (GW-A3, A4, A6) needs from the runtime
+
+#### GW-A2 · [Spike] Agent Handoff & Context Protocol
+**Status:** 🟡 PENDING · **Deps:** GW-A1 · **Labels:** `type:spike, area:harness`
+Design how ticket state/context passes across spec-planner → coder → test-author → security-reviewer → PR-reviewer, and how tickets route to the right agent.
+- [ ] Decide handoff medium (scratch files vs issue comments vs branch/commit metadata)
+- [ ] Define ticket→agent routing rules (labels vs changed-path heuristics)
+- [ ] Document the state object each agent reads/writes
+
+#### GW-A3 · [Build] Orchestrator Runtime Scaffold + Ticket-Pickup Loop
+**Status:** 🟡 PENDING · **Deps:** GW-A1, GW-A2 · **Labels:** `type:feature, area:harness`
+Stand up the chosen runtime and implement pickup: poll issues labeled `status:ready`, claim via `status:in-progress`, dispatch.
+- [ ] Runtime skeleton can invoke a Claude agent programmatically against GitHub Issues
+- [ ] Atomic claim avoids double-pickup
+- [ ] Loop dispatches a claimed ticket to a (stub) agent end-to-end for one issue
+
+#### GW-A4 · [Build] Autonomous Branch/Commit/PR Lifecycle Wiring
+**Status:** 🟡 PENDING · **Deps:** GW-A3 · **Labels:** `type:feature, area:harness`
+Wire the loop to create `feature/{issue#}-slug`, commit, push, and open a PR with `Closes #N`, reusing existing `pr-labels.yml` automation.
+- [ ] Branch naming + commit + push automated
+- [ ] PR opens with `Closes #N`; label transitions fire via existing automation
+
+#### GW-A5 · [Spike] Failure / Retry / Escalation Policy
+**Status:** 🟡 PENDING · **Deps:** GW-A1 · **Labels:** `type:spike, area:harness`
+Define behavior when an agent crashes, loops, or produces a failing PR.
+- [ ] Retry caps + stuck-agent/timeout detection defined
+- [ ] `status:blocked` human-escalation path defined
+- [ ] Decision doc covering abandon vs retry vs escalate
+
+#### GW-A6 · [Build] Autonomy Safety Guardrails (Budget + Kill-Switch + Branch Protection)
+**Status:** 🟡 PENDING · **Deps:** GW-A3, GW-A5 · **Labels:** `type:feature, area:harness`
+Implement the hard safety limits so an autonomous loop can't run away or bypass review.
+- [ ] Per-ticket cost/time/iteration caps + manual kill-switch (e.g. workflow toggle or label)
+- [ ] `main` branch protection: required checks, required review, no force-push, no self-merge bypass
+
+#### GW-A7 · [Build] Merge Gate / Definition-of-Done Policy
+**Status:** 🟡 PENDING · **Deps:** GW-C5, GW-D5, GW-E2 · **Labels:** `type:chore, area:harness`
+Define the single required-checks matrix that gates every merge (the keystone tying testing/security/quality together).
+- [ ] Required checks documented: type-check, lint, unit, integration, E2E, deepsec diff, Lighthouse budget
+- [ ] Wired as GitHub branch-protection required status checks
+
+#### GW-B0 · [Spike] Agent Specialization Boundaries
+**Status:** 🟡 PENDING · **Deps:** none · **Labels:** `type:spike, area:agents`
+Decide directory/tool ownership so the single generic coder splits cleanly into frontend/backend, and scope the test-author/security/PR-reviewer roles.
+- [ ] Path ownership map (FE: `apps/web`+`packages/ui`; BE: `apps/api`+`packages/db`)
+- [ ] Per-agent tool allowlist + scope; note where existing `reviewer`/`evaluator`/`develop-story` agents are reused
+
+#### GW-B1 · [Build] Frontend Coder Agent
+**Status:** 🟡 PENDING · **Deps:** GW-B0 · **Labels:** `type:feature, area:agents`
+Define `.claude/agents/frontend-coder.md` scoped to `apps/web` + `packages/ui`, encoding Next.js/Tailwind/shadcn + nuqs/trpc-client gotchas.
+- [ ] Agent definition with restricted toolset/scope
+- [ ] Refuses to edit `apps/api`/`packages/db`
+
+#### GW-B2 · [Build] Backend Coder Agent
+**Status:** 🟡 PENDING · **Deps:** GW-B0 · **Labels:** `type:feature, area:agents`
+Define `.claude/agents/backend-coder.md` scoped to `apps/api` + `packages/db`, encoding Fastify/tRPC/Drizzle/JWT gotchas.
+- [ ] Agent definition with restricted toolset/scope
+- [ ] Refuses to edit `apps/web`/`packages/ui`
+
+#### GW-B3 · [Build] Test Author Agent
+**Status:** 🟡 PENDING · **Deps:** GW-B0, GW-C2, GW-C3 · **Labels:** `type:feature, area:agents`
+Define an agent that writes Vitest + Playwright tests from the plan only (TDD red phase), independent of implementation. Fork the existing `unit-test`/`develop-story` pipeline where possible.
+- [ ] Produces failing tests from acceptance criteria before code exists
+- [ ] Covers unit + integration + E2E per TESTING.md
+
+#### GW-B4 · [Build] Security Reviewer Agent
+**Status:** 🟡 PENDING · **Deps:** GW-B0, GW-D5 · **Labels:** `type:feature, area:agents`
+Define an agent that runs deepsec `--diff` + an OWASP checklist against a PR diff and blocks on critical findings.
+- [ ] Consumes the FE/BE security checklists from GW-D1/GW-D3
+- [ ] Requests changes on critical/high findings
+
+#### GW-B5 · [Build] PR Reviewer Agent
+**Status:** 🟡 PENDING · **Deps:** GW-B0, GW-C5 · **Labels:** `type:feature, area:agents`
+Final review-gate agent (correctness + acceptance-criteria check). **Fork/reuse the existing `reviewer`/`evaluator` agents** — do not build net-new.
+- [ ] Approves or requests changes and drives the label automation
+- [ ] Verifies required checks are green before approving
+
+#### GW-B6 · [Build] Orchestrator Agent Definition
+**Status:** 🟡 PENDING · **Deps:** GW-A3, GW-A2, GW-B1, GW-B2, GW-B3, GW-B4, GW-B5 · **Labels:** `type:feature, area:agents`
+Define the agent that sequences the five specialists per ticket atop the runtime.
+- [ ] Routes a ticket through plan → coder → test-author → security → PR-reviewer
+- [ ] Handles handoff per GW-A2
+
+#### GW-C1 · [Spike] E2E & Test-Environment Strategy (FE + BE)
+**Status:** 🟡 PENDING · **Deps:** none · **Labels:** `type:spike, area:testing`
+Confirm Playwright for FE, pick the API integration approach (tRPC caller vs Fastify `inject`), decide ephemeral test Postgres/Redis strategy, and define what "E2E prerequisite" means per story type.
+- [ ] Decision doc: FE E2E tool + browser matrix, BE integration approach, test-DB/Redis provisioning, free-tier CI budget
+
+#### GW-C2 · [Build] Vitest Root Config + Coverage Thresholds
+**Status:** 🟡 PENDING · **Deps:** none · **Labels:** `type:feature, area:testing`
+Add real root/per-package Vitest config and **replace the no-op root `pnpm test --if-present`** so tests actually run.
+- [ ] Root + per-package config; coverage provider + thresholds per TESTING.md
+- [ ] `pnpm test` runs and reports; the one existing `packages/okf` test is picked up
+
+#### GW-C3 · [Build] Install & Configure Playwright (FE)
+**Status:** 🟡 PENDING · **Deps:** GW-C1 · **Labels:** `type:feature, area:testing`
+Install `@playwright/test`, add `playwright.config.ts`, an auth fixture, and one smoke spec.
+- [ ] Playwright installed + configured for the chosen browser matrix
+- [ ] One passing smoke spec runs locally and in CI
+
+#### GW-C4 · [Build] API Integration / E2E Test Harness (BE)
+**Status:** 🟡 PENDING · **Deps:** GW-C1, GW-C2 · **Labels:** `type:feature, area:testing`
+Stand up ephemeral test Postgres/Redis with setup/teardown and a first auth-router integration test.
+- [ ] Dockerized/ephemeral test DB + Redis with clean setup/teardown
+- [ ] First tRPC integration test (auth register/login) passes
+
+#### GW-C5 · [Build] Wire Real Tests into CI (required, blocking)
+**Status:** 🟡 PENDING · **Deps:** GW-C2, GW-C3, GW-C4 · **Labels:** `type:feature, area:testing`
+Update `ci.yml` to run unit + integration + E2E against the Postgres/Redis services and fail the build on red.
+- [ ] CI runs all suites; the current no-op is gone
+- [ ] Failing tests block the PR (required status check)
+
+#### GW-C6 · [Build] Test Data Builders & Fixtures
+**Status:** 🟡 PENDING · **Deps:** GW-C2, GW-C4 · **Labels:** `type:feature, area:testing`
+Implement shared factories (`createUser`, `createFilm`, `createRating`) per TESTING.md, consumed by the Test Author agent.
+- [ ] Reusable builders used by integration + E2E tests
+
+#### GW-C7 · [Build] Critical-Path E2E Smoke Suite
+**Status:** 🟡 PENDING · **Deps:** GW-C3 · **Labels:** `type:feature, area:testing`
+First real coverage: landing → sign-up → sign-in → logout Playwright spec.
+- [ ] Full auth critical path green in CI
+
+#### GW-D1 · [Spike] OWASP Top 10 Frontend Threat Model
+**Status:** 🟡 PENDING · **Deps:** none · **Labels:** `type:spike, area:security`
+Map OWASP risks onto the Next.js app: stored XSS (review text), CSRF, JWT-cookie handling, clickjacking, open-redirect on the `next` param, IDOR on ratings/lists, dependency risk.
+- [ ] Prioritized FE mitigation list feeding GW-D2 and the Security Reviewer agent
+
+#### GW-D2 · [Build] Next.js Security Headers & CSP
+**Status:** 🟡 PENDING · **Deps:** GW-D1 · **Labels:** `type:feature, area:security`
+Implement CSP, X-Frame-Options, HSTS, Referrer-Policy, Permissions-Policy; sanitize user-generated review text.
+- [ ] Headers applied via `next.config`/middleware; CSP verified on key routes
+- [ ] Review-text rendering is XSS-safe
+
+#### GW-D3 · [Spike] Backend API Security Hardening Review
+**Status:** 🟡 PENDING · **Deps:** none · **Labels:** `type:spike, area:security`
+Audit the Fastify/tRPC surface beyond existing rate-limit + CORS: per-procedure authz, Zod coverage, JWT edge cases, injection surface.
+- [ ] Gap list mapped to OWASP API Top 10, feeding GW-D4
+
+#### GW-D4 · [Build] Backend Hardening Implementation
+**Status:** 🟡 PENDING · **Deps:** GW-D3, GW-C4 · **Labels:** `type:feature, area:security`
+Close the gaps found in GW-D3.
+- [ ] Zod validation on all mutations; stricter route-specific rate limits
+- [ ] JWT edge cases (expired/malformed/tampered) tested; non-leaking error responses
+
+#### GW-D5 · [Build] Wire Deepsec into CI as PR Diff-Gate
+**Status:** 🟡 PENDING · **Deps:** none · **Labels:** `type:feature, area:security`
+Activate the already-configured root `.deepsec/` workspace as a `deepsec process --diff` required PR check (procedure documented in the deepsec skill — no spike needed).
+- [ ] CI runs deepsec on the PR diff; blocks on critical findings
+- [ ] Baseline established; known false-positives from `INFO.md` respected
+
+#### GW-D6 · [Build] Dependency + Secret Scanning
+**Status:** 🟡 PENDING · **Deps:** none · **Labels:** `type:feature, area:security`
+Add free dependency + secret scanning so autonomous agents can't ship vulns or commit credentials.
+- [ ] Dependabot alerts and/or `pnpm audit` CI gate on high/critical
+- [ ] gitleaks (or equivalent) pre-commit/CI secret scan; complements existing `.env` write-guard hook
+
+#### GW-E1 · [Spike] Lighthouse / LHCI Strategy + Baseline Audit
+**Status:** 🟡 PENDING · **Deps:** none · **Labels:** `type:spike, area:frontend`
+Confirm free `@lhci/cli`-in-Actions setup, capture current baseline scores, and set perf/a11y/best-practices/SEO **budgets**. "Perfect score" is the aspiration, enforced as a ratcheting budget (not a literal 100 against near-empty pages).
+- [ ] LHCI feasibility confirmed on free tier; baseline recorded; budgets defined
+
+#### GW-E2 · [Build] Wire LHCI into CI with Score Budgets
+**Status:** 🟡 PENDING · **Deps:** GW-E1 · **Labels:** `type:feature, area:frontend`
+Run Lighthouse in CI against key routes and fail the PR below budget.
+- [ ] LHCI config + per-category assertions; PR fails under budget; budgets ratchet upward over time
+
+#### GW-E3 · [Build] Cross-Browser Playwright Matrix + browserslist
+**Status:** 🟡 PENDING · **Deps:** GW-C3 · **Labels:** `type:feature, area:frontend`
+Add chromium/firefox/webkit Playwright projects and a `.browserslistrc` for Tailwind/Autoprefixer target consistency (config, not research). Real Safari/iOS device gaps noted as free-tier limitation.
+- [ ] E2E suite runs across the three engines in CI
+- [ ] `.browserslistrc` aligned to the target matrix
+
+#### GW-E4 · [Build] axe-core Accessibility Gate
+**Status:** 🟡 PENDING · **Deps:** GW-C3 · **Labels:** `type:feature, area:frontend`
+Add `@axe-core/playwright` assertions on key routes; fail CI on new violations.
+- [ ] axe checks on landing/auth/films; zero new critical violations enforced
+
+#### GW-E5 · [Build] Responsive Breakpoints + Mobile Viewport Tests
+**Status:** 🟡 PENDING · **Deps:** GW-C3 · **Labels:** `type:feature, area:frontend`
+Define custom Tailwind breakpoints (none exist today) and add Playwright mobile/tablet/desktop viewport smoke tests.
+- [ ] Documented breakpoint scale
+- [ ] Viewport matrix tests for landing + films + auth flows
+
+#### GW-E6 · [Build] Bundle Analysis & Size Budget
+**Status:** 🟡 PENDING · **Deps:** none · **Labels:** `type:feature, area:frontend`
+Wire `@next/bundle-analyzer` + a `size-limit` CI budget to prevent performance regressions over time.
+- [ ] Bundle report available; CI fails if key-route bundle exceeds budget
+
+**Execution order (dependency waves; parallelize within a wave):**
+- **Wave 0 (no deps):** GW-A1, B0, C1, C2, D1, D3, D5, D6, E1, E6
+- **Wave 1:** GW-A2, A5, C3, C4, B1, B2, D2, D4, E2, E3, E4, E5
+- **Wave 2:** GW-A3, C5, C6, C7, B3, B4, B5
+- **Wave 3:** GW-A4, A6, B6
+- **Wave 4:** GW-A7 (merge gate) → autonomous lifecycle live
+
+> A1 is mandated first *for the harness track*, but the testing (C), security (D), and quality (E) lanes are independent and can start in parallel on day one. Don't let "spike first" stall the cheap, high-leverage builds (GW-C2, D5, E6).
 
 ---
 
@@ -55,7 +267,7 @@ This document breaks down Movie Haven features into granular user stories. Each 
 
 **Description:** Fetch and display current movies from TMDB's now playing endpoint on landing page.
 
-**Status:** 🟡 IN PROGRESS (carousel exists, needs separate endpoint)
+**Status:** ⏭️ MOVED TO PHASE 2 (GitHub #7) — deferred so Phase 1 groundwork lands first
 
 **Acceptance Criteria:**
 - [ ] Fetch current movies from TMDB API (`GET /movie/now_playing`)
@@ -95,7 +307,7 @@ This document breaks down Movie Haven features into granular user stories. Each 
 
 **Description:** Fetch and display top-grossing movies from TMDB on landing page.
 
-**Status:** 🟡 IN PROGRESS (carousel exists, needs separate endpoint)
+**Status:** ⏭️ MOVED TO PHASE 2 (GitHub #8) — deferred so Phase 1 groundwork lands first
 
 **Acceptance Criteria:**
 - [ ] Fetch top-grossing movies from TMDB API (by revenue)
@@ -133,7 +345,7 @@ This document breaks down Movie Haven features into granular user stories. Each 
 
 **Description:** Fetch and display top-rated movies from TMDB on landing page.
 
-**Status:** 🟡 IN PROGRESS (carousel exists, needs separate endpoint)
+**Status:** ⏭️ MOVED TO PHASE 2 (GitHub #9) — deferred so Phase 1 groundwork lands first
 
 **Acceptance Criteria:**
 - [ ] Fetch top-rated movies from TMDB API (`GET /movie/top_rated`)
@@ -376,7 +588,7 @@ This document breaks down Movie Haven features into granular user stories. Each 
 
 **Description:** Create a database script that populates demo data: 500 movies and 100 sample ratings for the demo profile.
 
-**Status:** 🟡 PENDING
+**Status:** ⏭️ MOVED TO PHASE 2 (GitHub #10) — deferred so Phase 1 groundwork lands first
 
 **Acceptance Criteria:**
 - [ ] 500 movies seeded into `films` table (from TMDB API, paginated fetch)
@@ -431,7 +643,7 @@ pnpm --filter @movie-haven/api seed:demo
 
 **Description:** Create a public demo profile page showcasing the demo user with a button on landing page.
 
-**Status:** 🟡 PENDING
+**Status:** ⏭️ MOVED TO PHASE 2 (GitHub #11) — deferred so Phase 1 groundwork lands first
 
 **Acceptance Criteria:**
 - [ ] Route accessible at `/demo` without authentication
@@ -480,7 +692,7 @@ pnpm --filter @movie-haven/api seed:demo
 
 **Description:** Build UI to display demo user's ratings with interactive filters and sorts.
 
-**Status:** 🟡 PENDING
+**Status:** ⏭️ MOVED TO PHASE 2 (GitHub #12) — deferred so Phase 1 groundwork lands first
 
 **Acceptance Criteria:**
 - [ ] Display all 100 ratings in a table/grid layout with pagination or infinite scroll
@@ -532,7 +744,7 @@ pnpm --filter @movie-haven/api seed:demo
 
 **Description:** Ensure `/films` route is properly protected and add authenticated app layout with navigation.
 
-**Status:** 🟡 IN PROGRESS (route protected ✅, layout exists, needs refinement)
+**Status:** ⏭️ MOVED TO PHASE 2 (GitHub #13) — route protection already done ✅; remaining nav/layout work deferred so Phase 1 groundwork lands first
 
 **Acceptance Criteria:**
 - [x] Route at `/films` requires JWT authentication
@@ -1056,7 +1268,19 @@ cd apps/web && pnpm shadcn add pagination
 
 ## Phase 2: Profile Builder & Data Import
 
-> Stories for Phase 2 will be added after Phase 1 is complete and spikes are resolved.
+> Full Phase 2 stories (profile builder, IMDb import, ratings/reviews, watchlists, social auth) will be added after Phase 1 groundwork is complete. Detailed acceptance criteria for the moved feature stories below remain in their original locations in the Phase 1 section — only their **phase/milestone** changed.
+
+**Feature stories moved here from Phase 1** (deferred so the agentic-harness groundwork lands first; GitHub Issues are the source of truth):
+
+| Story | Title | GitHub |
+|---|---|---|
+| 1.2 | Display Current Movies in Theater (NOW_PLAYING) | #7 |
+| 1.3 | Display Top Movies by Box Office Revenue | #8 |
+| 1.4 | Display Top Movies by IMDb Rating | #9 |
+| 1.9 | Seed Demo Database with 500 Movies & 100 Ratings | #10 |
+| 1.10 | Create Demo Profile Page & Button | #11 |
+| 1.11 | Display Demo Ratings with Filters & Sorts (UI Layer) | #12 |
+| 1.12 | Protected /films Route & Main App Layout (route protection already done ✅) | #13 |
 
 ---
 
