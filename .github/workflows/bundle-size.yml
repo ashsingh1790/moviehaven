@@ -1,0 +1,36 @@
+name: Bundle Size
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  bundle-size:
+    name: Build web · Check bundle budget
+    runs-on: ubuntu-latest
+
+    env:
+      # Dummy values — the production build only needs these to be present.
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      JWT_SECRET: ci-dummy
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build web
+        run: pnpm --filter @movie-haven/web build
+
+      - name: Check bundle size budget
+        run: pnpm --filter @movie-haven/web check-bundle-size
