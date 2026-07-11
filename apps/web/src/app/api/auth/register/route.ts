@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import { serverTrpc } from "@/lib/trpc/server";
 import { SESSION_COOKIE, SESSION_EXPIRY_DAYS } from "@/lib/auth";
+import { serverTrpc } from "@/lib/trpc/server";
+import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {

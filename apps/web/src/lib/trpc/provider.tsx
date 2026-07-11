@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { SESSION_COOKIE } from "@/lib/auth-constants";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink, loggerLink } from "@trpc/client";
+import { useState } from "react";
 import SuperJSON from "superjson";
 import { trpc } from "./client";
-import { SESSION_COOKIE } from "@/lib/auth-constants";
 
 function getSessionToken(): string | undefined {
   if (typeof document === "undefined") return undefined;
