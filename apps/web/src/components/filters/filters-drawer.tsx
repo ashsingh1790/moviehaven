@@ -62,7 +62,7 @@ export function FiltersDrawer({ open, onClose }: FiltersDrawerProps) {
         open
         aria-modal="true"
         aria-label="Filters"
-        className={`m-0 max-w-none max-h-none fixed inset-y-0 left-0 z-50 flex w-[300px] flex-col border-0 bg-background border-r border-border shadow-2xl transition-transform duration-200 ease-out ${
+        className={`m-0 p-0 max-w-none max-h-none fixed inset-y-0 left-0 z-50 flex w-[300px] flex-col border-0 bg-background text-foreground border-r border-border shadow-2xl transition-transform duration-200 ease-out ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
