@@ -1,8 +1,8 @@
+import { countryCodeToFlag, formatScore, tmdbImageUrl } from "@/lib/utils";
+import type { FilmCard as FilmCardType } from "@movie-haven/types";
+import { Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Star } from "lucide-react";
-import type { FilmCard as FilmCardType } from "@movie-haven/types";
-import { countryCodeToFlag, formatScore, tmdbImageUrl } from "@/lib/utils";
 
 interface FilmCardProps {
   film: FilmCardType;

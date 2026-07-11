@@ -1,15 +1,15 @@
 "use client";
 
-import { Suspense, useState } from "react";
-import { Search, SlidersHorizontal } from "lucide-react";
-import type { SortChip } from "@movie-haven/types";
-import { trpc } from "@/lib/trpc/client";
 import { FilmCard } from "@/components/film-card";
-import { SortChips } from "@/components/filters/sort-chips";
 import { ActiveFilterTags } from "@/components/filters/active-filter-tags";
 import { FiltersDrawer } from "@/components/filters/filters-drawer";
+import { SortChips } from "@/components/filters/sort-chips";
 import { useFilmFilters } from "@/hooks/use-film-filters";
+import { trpc } from "@/lib/trpc/client";
+import type { SortChip } from "@movie-haven/types";
 import { cn } from "@movie-haven/ui";
+import { Search, SlidersHorizontal } from "lucide-react";
+import { Suspense, useState } from "react";
 
 function FilmGrid({ onOpenFilters }: { onOpenFilters: () => void }) {
   const { searchParams, filters, setFilter } = useFilmFilters();
@@ -37,6 +37,7 @@ function FilmGrid({ onOpenFilters }: { onOpenFilters: () => void }) {
         <div className="flex items-center gap-3">
           {/* Filter button */}
           <button
+            type="button"
             onClick={onOpenFilters}
             className={cn(
               "flex shrink-0 items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors",
@@ -132,6 +133,7 @@ function Pagination({
   return (
     <div className="flex items-center justify-center gap-2 py-4">
       <button
+        type="button"
         onClick={() => onPageChange(page - 1)}
         disabled={page <= 1}
         className="rounded-md border border-border px-3 py-1.5 text-sm hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
@@ -142,6 +144,7 @@ function Pagination({
         Page {page} of {totalPages}
       </span>
       <button
+        type="button"
         onClick={() => onPageChange(page + 1)}
         disabled={page >= totalPages}
         className="rounded-md border border-border px-3 py-1.5 text-sm hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
@@ -152,11 +155,13 @@ function Pagination({
   );
 }
 
+const FILM_GRID_SKELETON_IDS = Array.from({ length: 24 }, () => crypto.randomUUID());
+
 function FilmGridSkeleton() {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4">
-      {Array.from({ length: 24 }).map((_, i) => (
-        <div key={i} className="rounded-lg bg-card border border-border overflow-hidden">
+      {FILM_GRID_SKELETON_IDS.map(id => (
+        <div key={id} className="rounded-lg bg-card border border-border overflow-hidden">
           <div className="aspect-[2/3] bg-muted animate-pulse" />
           <div className="p-2.5 space-y-2">
             <div className="h-3 rounded bg-muted animate-pulse" />
