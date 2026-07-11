@@ -24,27 +24,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # NOTE: continue-on-error is intentional, not a rubber stamp.
-      # As of this workflow's creation, `pnpm audit --audit-level high`
-      # already reports pre-existing findings on main (15 high, 1 critical)
-      # tracked in issue #47's PR description — mostly the unused
-      # @clerk/nextjs scaffold package (see root CLAUDE.md gotcha #1, never
-      # called, slated for removal) plus `next` and `drizzle-orm` needing
-      # version bumps that are out of scope for this scanning-infra ticket.
-      # Hard-blocking every future PR on pre-existing debt would just train
-      # agents to ignore/bypass this job. Dependabot (see dependabot.yml)
-      # will open upgrade PRs for the fixable ones; once those land and the
-      # tree is clean, flip this step back to a hard gate by removing
-      # continue-on-error.
       - name: pnpm audit (high + critical)
         id: audit
-        continue-on-error: true
         run: pnpm audit --audit-level high
-
-      - name: Annotate if audit found issues
-        if: steps.audit.outcome == 'failure'
-        run: |
-          echo "::warning::pnpm audit found high/critical vulnerabilities. This is currently non-blocking due to pre-existing findings (see step above and PR #47 for details) — do not add NEW high/critical vulnerable dependencies. Run 'pnpm audit --audit-level high' locally to see details."
 
   secrets:
     name: Secret scan (gitleaks)
