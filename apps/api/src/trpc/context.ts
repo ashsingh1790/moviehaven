@@ -1,5 +1,5 @@
-import type { CreateFastifyContextOptions } from "@trpc/server/adapters/fastify";
 import { db } from "@movie-haven/db";
+import type { CreateFastifyContextOptions } from "@trpc/server/adapters/fastify";
 import type { Redis } from "ioredis";
 import { verifyToken } from "../lib/jwt";
 

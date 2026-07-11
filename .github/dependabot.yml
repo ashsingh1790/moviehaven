@@ -1,0 +1,25 @@
+version: 2
+
+updates:
+  # pnpm workspace root — Dependabot resolves pnpm-workspace.yaml from here
+  # and covers apps/api, apps/web, and packages/* in one entry.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    labels:
+      - "type:chore"
+      - "area:security"
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      # Bundle low-risk minor/patch bumps into one PR per run to limit PR
+      # noise. Major bumps are excluded so they always get their own PR
+      # and explicit review (breaking changes need a human look).
+      minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"

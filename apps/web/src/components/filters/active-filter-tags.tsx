@@ -1,8 +1,8 @@
 "use client";
 
-import { X } from "lucide-react";
-import { countryCodeToFlag } from "@/lib/utils";
 import { useFilmFilters } from "@/hooks/use-film-filters";
+import { countryCodeToFlag } from "@/lib/utils";
+import { X } from "lucide-react";
 
 const GENRE_NAMES: Record<number, string> = {
   28: "Action",
@@ -59,19 +59,19 @@ export function ActiveFilterTags() {
     tags.push({ label: `"${filters.query}"`, onRemove: () => setFilter("query", null) });
   }
 
-  filters.genres?.forEach(id => {
+  for (const id of filters.genres ?? []) {
     tags.push({
       label: GENRE_NAMES[id] ?? `Genre ${id}`,
       onRemove: () => setFilter("genres", filters.genres?.filter(g => g !== id) ?? null),
     });
-  });
+  }
 
-  filters.countries?.forEach(code => {
+  for (const code of filters.countries ?? []) {
     tags.push({
       label: `${countryCodeToFlag(code)} ${COUNTRY_NAMES[code] ?? code}`,
       onRemove: () => setFilter("countries", filters.countries?.filter(c => c !== code) ?? null),
     });
-  });
+  }
 
   if (filters.minYear ?? filters.maxYear) {
     const min = filters.minYear ?? 1900;
@@ -97,7 +97,7 @@ export function ActiveFilterTags() {
     });
   }
 
-  filters.streamingPlatforms?.forEach(platform => {
+  for (const platform of filters.streamingPlatforms ?? []) {
     tags.push({
       label: platform,
       onRemove: () =>
@@ -106,19 +106,20 @@ export function ActiveFilterTags() {
           filters.streamingPlatforms?.filter(p => p !== platform) ?? null,
         ),
     });
-  });
+  }
 
   if (tags.length === 0) return null;
 
   return (
     <div className="flex flex-wrap gap-1.5">
-      {tags.map((tag, i) => (
+      {tags.map(tag => (
         <span
-          key={i}
+          key={tag.label}
           className="flex items-center gap-1 rounded-full border border-border bg-secondary px-2.5 py-0.5 text-xs text-foreground"
         >
           {tag.label}
           <button
+            type="button"
             onClick={tag.onRemove}
             className="text-muted-foreground hover:text-foreground transition-colors"
           >

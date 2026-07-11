@@ -1,10 +1,4 @@
-export type SortField =
-  | "tmdbScore"
-  | "releaseDate"
-  | "popularity"
-  | "title"
-  | "budget"
-  | "revenue";
+export type SortField = "tmdbScore" | "releaseDate" | "popularity" | "title" | "budget" | "revenue";
 
 export type SortDirection = "asc" | "desc";
 

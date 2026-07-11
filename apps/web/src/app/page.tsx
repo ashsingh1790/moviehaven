@@ -1,9 +1,9 @@
-import { Suspense } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { Film, ChevronRight, Play } from "lucide-react";
-import { serverTrpc } from "@/lib/trpc/server";
 import { getSession } from "@/lib/auth";
+import { serverTrpc } from "@/lib/trpc/server";
+import { ChevronRight, Film, Play } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { Suspense } from "react";
 
 // TMDb genre ID → label (most common genres)
 const GENRE_LABELS: Record<number, string> = {
@@ -42,7 +42,7 @@ const GRADIENTS = [
 ];
 
 async function PopularMoviesSection() {
-  let movies;
+  let movies: Awaited<ReturnType<typeof serverTrpc.tmdb.popularMovies.query>>;
   try {
     movies = await serverTrpc.tmdb.popularMovies.query({ limit: 10 });
   } catch {
@@ -57,7 +57,7 @@ async function PopularMoviesSection() {
     <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
       {movies.map((film, i) => {
         const genre = film.genreIds[0] ? (GENRE_LABELS[film.genreIds[0]] ?? null) : null;
-        const gradient = GRADIENTS[i % GRADIENTS.length]!;
+        const gradient = GRADIENTS[i % GRADIENTS.length] ?? "from-violet-900 to-purple-700";
         return (
           <Link
             key={film.tmdbId}
@@ -109,11 +109,13 @@ async function PopularMoviesSection() {
   );
 }
 
+const POPULAR_MOVIES_SKELETON_IDS = Array.from({ length: 10 }, () => crypto.randomUUID());
+
 function PopularMoviesSkeleton() {
   return (
     <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-      {Array.from({ length: 10 }).map((_, i) => (
-        <div key={i} className="shrink-0 w-[140px] sm:w-[160px]">
+      {POPULAR_MOVIES_SKELETON_IDS.map(id => (
+        <div key={id} className="shrink-0 w-[140px] sm:w-[160px]">
           <div className="aspect-[2/3] rounded-lg bg-muted animate-pulse" />
           <div className="mt-2 space-y-1.5 px-0.5">
             <div className="h-3 rounded bg-muted animate-pulse" />

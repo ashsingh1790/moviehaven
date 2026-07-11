@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { Check, ChevronDown, Search } from "lucide-react";
-import { cn } from "@movie-haven/ui";
 import { countryCodeToFlag } from "@/lib/utils";
+import { cn } from "@movie-haven/ui";
+import { Check, ChevronDown, Search } from "lucide-react";
+import { useState } from "react";
 
 const POPULAR_COUNTRIES = [
   { code: "US", name: "United States" },
@@ -58,6 +58,7 @@ export function CountryFilter({ selected, onChange }: CountryFilterProps) {
   return (
     <div>
       <button
+        type="button"
         onClick={() => setExpanded(e => !e)}
         className="flex w-full items-center justify-between py-1 text-sm font-medium hover:text-primary transition-colors"
       >
@@ -86,6 +87,7 @@ export function CountryFilter({ selected, onChange }: CountryFilterProps) {
               return (
                 <button
                   key={country.code}
+                  type="button"
                   onClick={() => toggle(country.code)}
                   className={cn(
                     "flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs transition-colors text-left border",

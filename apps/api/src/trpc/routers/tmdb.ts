@@ -1,7 +1,7 @@
-import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { publicProcedure, router } from "../init";
+import { z } from "zod";
 import { type TmdbMovie, discoverPopularThisWeek, posterUrl } from "../../lib/tmdb";
+import { publicProcedure, router } from "../init";
 
 const CACHE_KEY = "tmdb:popular-movies";
 const CACHE_TTL_SECONDS = 60 * 60 * 6; // 6 hours — weekly trending doesn't change minute to minute
