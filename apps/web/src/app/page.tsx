@@ -1,9 +1,9 @@
-import { Suspense } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { Film, ChevronRight, Play } from "lucide-react";
-import { serverTrpc } from "@/lib/trpc/server";
 import { getSession } from "@/lib/auth";
+import { serverTrpc } from "@/lib/trpc/server";
+import { ChevronRight, Film, Play } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { Suspense } from "react";
 
 // TMDb genre ID → label (most common genres)
 const GENRE_LABELS: Record<number, string> = {

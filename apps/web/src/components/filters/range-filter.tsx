@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronDown } from "lucide-react";
 import { Slider } from "@movie-haven/ui";
 import { cn } from "@movie-haven/ui";
+import { ChevronDown } from "lucide-react";
+import { useState } from "react";
 
 interface RangeFilterProps {
   label: string;

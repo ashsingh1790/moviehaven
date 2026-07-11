@@ -1,11 +1,11 @@
+import { AuthProvider, type AuthUser } from "@/contexts/auth-context";
+import { getSession } from "@/lib/auth";
+import { TRPCProvider } from "@/lib/trpc/provider";
+import { serverTrpc } from "@/lib/trpc/server";
+import { TooltipProvider } from "@movie-haven/ui";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { TooltipProvider } from "@movie-haven/ui";
-import { TRPCProvider } from "@/lib/trpc/provider";
-import { AuthProvider, type AuthUser } from "@/contexts/auth-context";
-import { getSession } from "@/lib/auth";
-import { serverTrpc } from "@/lib/trpc/server";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });

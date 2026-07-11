@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@movie-haven/ui";
+import { Check, ChevronDown } from "lucide-react";
+import { useState } from "react";
 
 const STREAMING_PLATFORMS = [
   { id: "netflix", name: "Netflix" },

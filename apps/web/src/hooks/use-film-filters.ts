@@ -1,7 +1,7 @@
 "use client";
 
-import { parseAsArrayOf, parseAsFloat, parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import type { FilmSearchParams, SortChip } from "@movie-haven/types";
+import { parseAsArrayOf, parseAsFloat, parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 
 const parseSortChips = {
   parse: (value: string): SortChip[] => {

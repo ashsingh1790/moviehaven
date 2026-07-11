@@ -1,7 +1,7 @@
 "use client";
 
-import { ArrowDown, ArrowUp, Plus, X } from "lucide-react";
 import type { SortChip, SortField } from "@movie-haven/types";
+import { ArrowDown, ArrowUp, Plus, X } from "lucide-react";
 
 const SORT_OPTIONS: { field: SortField; label: string }[] = [
   { field: "tmdbScore", label: "TMDB Score" },

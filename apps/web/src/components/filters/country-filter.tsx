@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { Check, ChevronDown, Search } from "lucide-react";
-import { cn } from "@movie-haven/ui";
 import { countryCodeToFlag } from "@/lib/utils";
+import { cn } from "@movie-haven/ui";
+import { Check, ChevronDown, Search } from "lucide-react";
+import { useState } from "react";
 
 const POPULAR_COUNTRIES = [
   { code: "US", name: "United States" },

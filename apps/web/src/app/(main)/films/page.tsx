@@ -1,15 +1,15 @@
 "use client";
 
-import { Suspense, useState } from "react";
-import { Search, SlidersHorizontal } from "lucide-react";
-import type { SortChip } from "@movie-haven/types";
-import { trpc } from "@/lib/trpc/client";
 import { FilmCard } from "@/components/film-card";
-import { SortChips } from "@/components/filters/sort-chips";
 import { ActiveFilterTags } from "@/components/filters/active-filter-tags";
 import { FiltersDrawer } from "@/components/filters/filters-drawer";
+import { SortChips } from "@/components/filters/sort-chips";
 import { useFilmFilters } from "@/hooks/use-film-filters";
+import { trpc } from "@/lib/trpc/client";
+import type { SortChip } from "@movie-haven/types";
 import { cn } from "@movie-haven/ui";
+import { Search, SlidersHorizontal } from "lucide-react";
+import { Suspense, useState } from "react";
 
 function FilmGrid({ onOpenFilters }: { onOpenFilters: () => void }) {
   const { searchParams, filters, setFilter } = useFilmFilters();

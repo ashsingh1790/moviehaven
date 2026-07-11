@@ -1,8 +1,8 @@
 "use client";
 
-import { X } from "lucide-react";
-import { countryCodeToFlag } from "@/lib/utils";
 import { useFilmFilters } from "@/hooks/use-film-filters";
+import { countryCodeToFlag } from "@/lib/utils";
+import { X } from "lucide-react";
 
 const GENRE_NAMES: Record<number, string> = {
   28: "Action",
