@@ -1,0 +1,66 @@
+name: Security
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  audit:
+    name: Dependency audit (pnpm audit)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # NOTE: continue-on-error is intentional, not a rubber stamp.
+      # As of this workflow's creation, `pnpm audit --audit-level high`
+      # already reports pre-existing findings on main (15 high, 1 critical)
+      # tracked in issue #47's PR description — mostly the unused
+      # @clerk/nextjs scaffold package (see root CLAUDE.md gotcha #1, never
+      # called, slated for removal) plus `next` and `drizzle-orm` needing
+      # version bumps that are out of scope for this scanning-infra ticket.
+      # Hard-blocking every future PR on pre-existing debt would just train
+      # agents to ignore/bypass this job. Dependabot (see dependabot.yml)
+      # will open upgrade PRs for the fixable ones; once those land and the
+      # tree is clean, flip this step back to a hard gate by removing
+      # continue-on-error.
+      - name: pnpm audit (high + critical)
+        id: audit
+        continue-on-error: true
+        run: pnpm audit --audit-level high
+
+      - name: Annotate if audit found issues
+        if: steps.audit.outcome == 'failure'
+        run: |
+          echo "::warning::pnpm audit found high/critical vulnerabilities. This is currently non-blocking due to pre-existing findings (see step above and PR #47 for details) — do not add NEW high/critical vulnerable dependencies. Run 'pnpm audit --audit-level high' locally to see details."
+
+  secrets:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Free for personal/individual GitHub accounts (this repo). A
+      # GITLEAKS_LICENSE secret is only required for organization-owned
+      # repos — not needed here.
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
