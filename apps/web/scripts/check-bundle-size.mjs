@@ -16,10 +16,11 @@
  * headroom. When a legitimate feature raises a route past its budget, raise
  * the budget consciously in the same PR — never silently.
  *
- * Baselines measured 2026-07-10 (Next 15.5.15, gzip level 9):
- *   /        174.7 KiB
- *   /films   227.2 KiB
- *   /sign-in 172.0 KiB
+ * Baselines re-measured 2026-07-10 after the main-branch merge bumped
+ * `next` ^15.3.0 -> ^15.5.18 (resolves 15.5.20), gzip level 9:
+ *   /        173.6 KiB  (was 174.7 KiB on Next 15.5.15)
+ *   /films   226.5 KiB  (was 227.2 KiB on Next 15.5.15)
+ *   /sign-in 170.9 KiB  (was 172.0 KiB on Next 15.5.15)
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -31,9 +32,9 @@ const nextDir = join(webRoot, ".next");
 
 /** Budget per route in KiB (gzipped). Measured baseline +10% headroom. */
 const BUDGETS_KIB = {
-  "/": 192,
-  "/films": 250,
-  "/sign-in": 189,
+  "/": 191,
+  "/films": 249,
+  "/sign-in": 188,
 };
 
 /** Manifest entries (page + ancestor layouts) that make up each route. */
