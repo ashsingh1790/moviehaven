@@ -15,7 +15,7 @@
     "okf:build": "tsx scripts/okf-build.ts"
   },
   "dependencies": {
-    "@fastify/cors": "^10.0.2",
+    "@fastify/cors": "^11.3.0",
     "@fastify/rate-limit": "^10.2.1",
     "@movie-haven/db": "workspace:*",
     "@movie-haven/okf": "workspace:*",
