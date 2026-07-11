@@ -44,6 +44,7 @@ export function GenreFilter({ selected, onChange }: GenreFilterProps) {
   return (
     <div>
       <button
+        type="button"
         onClick={() => setExpanded(e => !e)}
         className="flex w-full items-center justify-between py-1 text-sm font-medium hover:text-primary transition-colors"
       >
@@ -60,6 +61,7 @@ export function GenreFilter({ selected, onChange }: GenreFilterProps) {
             return (
               <button
                 key={genre.id}
+                type="button"
                 onClick={() => toggle(genre.id)}
                 className={cn(
                   "flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors border",

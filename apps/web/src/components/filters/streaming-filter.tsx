@@ -36,6 +36,7 @@ export function StreamingFilter({ selected, onChange }: StreamingFilterProps) {
   return (
     <div>
       <button
+        type="button"
         onClick={() => setExpanded(e => !e)}
         className="flex w-full items-center justify-between py-1 text-sm font-medium hover:text-primary transition-colors"
       >
@@ -53,6 +54,7 @@ export function StreamingFilter({ selected, onChange }: StreamingFilterProps) {
             return (
               <button
                 key={platform.id}
+                type="button"
                 onClick={() => toggle(platform.id)}
                 className={cn(
                   "flex w-full items-center justify-between rounded-md px-3 py-1.5 text-xs transition-colors",

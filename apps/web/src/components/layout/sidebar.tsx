@@ -16,6 +16,7 @@ export function FilterSidebar() {
         <span className="text-sm font-semibold">Filters</span>
         {Object.keys(filters).length > 0 && (
           <button
+            type="button"
             onClick={clearAll}
             className="text-xs text-muted-foreground hover:text-foreground transition-colors"
           >

@@ -48,6 +48,7 @@ export function SortChips({ sort, onChange }: SortChipsProps) {
           <span className="mr-0.5">{index + 1}.</span>
           <span>{SORT_OPTIONS.find(o => o.field === chip.field)?.label}</span>
           <button
+            type="button"
             onClick={() => toggleDirection(index)}
             className="ml-1 hover:text-primary/70 transition-colors"
             title={`Switch to ${chip.direction === "asc" ? "descending" : "ascending"}`}
@@ -59,6 +60,7 @@ export function SortChips({ sort, onChange }: SortChipsProps) {
             )}
           </button>
           <button
+            type="button"
             onClick={() => removeSort(index)}
             className="ml-0.5 hover:text-primary/70 transition-colors"
           >
@@ -69,7 +71,10 @@ export function SortChips({ sort, onChange }: SortChipsProps) {
 
       {sort.length < 3 && available.length > 0 && (
         <div className="relative group">
-          <button className="flex items-center gap-1 rounded-full border border-border bg-secondary px-2.5 py-1 text-xs text-muted-foreground hover:border-primary/40 hover:text-foreground transition-colors">
+          <button
+            type="button"
+            className="flex items-center gap-1 rounded-full border border-border bg-secondary px-2.5 py-1 text-xs text-muted-foreground hover:border-primary/40 hover:text-foreground transition-colors"
+          >
             <Plus className="h-3 w-3" />
             Add sort
           </button>
@@ -77,6 +82,7 @@ export function SortChips({ sort, onChange }: SortChipsProps) {
             {available.map(option => (
               <button
                 key={option.field}
+                type="button"
                 onClick={() => addSort(option.field)}
                 className="flex w-full items-center px-3 py-1.5 text-xs text-foreground hover:bg-accent transition-colors"
               >

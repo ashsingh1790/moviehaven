@@ -1,18 +1,7 @@
 "use client";
 
-import type { FilmSearchParams, SortChip } from "@movie-haven/types";
+import type { FilmSearchParams } from "@movie-haven/types";
 import { parseAsArrayOf, parseAsFloat, parseAsInteger, parseAsString, useQueryStates } from "nuqs";
-
-const parseSortChips = {
-  parse: (value: string): SortChip[] => {
-    try {
-      return JSON.parse(decodeURIComponent(value)) as SortChip[];
-    } catch {
-      return [];
-    }
-  },
-  serialize: (value: SortChip[]) => encodeURIComponent(JSON.stringify(value)),
-};
 
 export function useFilmFilters() {
   const [filters, setFilters] = useQueryStates(
