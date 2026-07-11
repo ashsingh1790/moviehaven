@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronDown } from "lucide-react";
 import { Slider } from "@movie-haven/ui";
 import { cn } from "@movie-haven/ui";
+import { ChevronDown } from "lucide-react";
+import { useState } from "react";
 
 interface RangeFilterProps {
   label: string;
@@ -22,6 +22,7 @@ export function RangeFilter({ label, min, max, step = 1, value, onChange }: Rang
   return (
     <div>
       <button
+        type="button"
         onClick={() => setExpanded(e => !e)}
         className="flex w-full items-center justify-between py-1 text-sm font-medium hover:text-primary transition-colors"
       >

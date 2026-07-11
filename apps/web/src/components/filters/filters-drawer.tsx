@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
-import { X } from "lucide-react";
-import { ScrollArea, Separator } from "@movie-haven/ui";
-import { GenreFilter } from "@/components/filters/faceted-filter";
 import { CountryFilter } from "@/components/filters/country-filter";
-import { StreamingFilter } from "@/components/filters/streaming-filter";
+import { GenreFilter } from "@/components/filters/faceted-filter";
 import { RangeFilter } from "@/components/filters/range-filter";
+import { StreamingFilter } from "@/components/filters/streaming-filter";
 import { useFilmFilters } from "@/hooks/use-film-filters";
+import { ScrollArea, Separator } from "@movie-haven/ui";
+import { X } from "lucide-react";
+import { useEffect } from "react";
 
 interface FiltersDrawerProps {
   open: boolean;
@@ -46,20 +46,23 @@ export function FiltersDrawer({ open, onClose }: FiltersDrawerProps) {
   return (
     <>
       {/* Backdrop */}
-      <div
+      <button
+        type="button"
         aria-hidden
+        tabIndex={-1}
         onClick={onClose}
-        className={`fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity duration-200 ${
+        className={`fixed inset-0 z-40 cursor-default bg-black/50 backdrop-blur-sm transition-opacity duration-200 ${
           open ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       />
 
-      {/* Drawer panel */}
-      <aside
-        role="dialog"
+      {/* Drawer panel: always rendered `open` so the translate-x transition can animate;
+          visibility is controlled by the transform, not the native open/closed state */}
+      <dialog
+        open
         aria-modal="true"
         aria-label="Filters"
-        className={`fixed inset-y-0 left-0 z-50 flex w-[300px] flex-col bg-background border-r border-border shadow-2xl transition-transform duration-200 ease-out ${
+        className={`m-0 max-w-none max-h-none fixed inset-y-0 left-0 z-50 flex w-[300px] flex-col border-0 bg-background border-r border-border shadow-2xl transition-transform duration-200 ease-out ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -76,6 +79,7 @@ export function FiltersDrawer({ open, onClose }: FiltersDrawerProps) {
           <div className="flex items-center gap-2">
             {activeCount > 0 && (
               <button
+                type="button"
                 onClick={clearAll}
                 className="text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
@@ -83,6 +87,7 @@ export function FiltersDrawer({ open, onClose }: FiltersDrawerProps) {
               </button>
             )}
             <button
+              type="button"
               onClick={onClose}
               className="rounded-md p-1.5 hover:bg-accent transition-colors"
               aria-label="Close filters"
@@ -144,7 +149,7 @@ export function FiltersDrawer({ open, onClose }: FiltersDrawerProps) {
             />
           </div>
         </ScrollArea>
-      </aside>
+      </dialog>
     </>
   );
 }
