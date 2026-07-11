@@ -1,11 +1,11 @@
 "use client";
 
-import { ScrollArea, Separator } from "@movie-haven/ui";
-import { GenreFilter } from "@/components/filters/faceted-filter";
 import { CountryFilter } from "@/components/filters/country-filter";
-import { StreamingFilter } from "@/components/filters/streaming-filter";
+import { GenreFilter } from "@/components/filters/faceted-filter";
 import { RangeFilter } from "@/components/filters/range-filter";
+import { StreamingFilter } from "@/components/filters/streaming-filter";
 import { useFilmFilters } from "@/hooks/use-film-filters";
+import { ScrollArea, Separator } from "@movie-haven/ui";
 
 export function FilterSidebar() {
   const { filters, setFilter, clearAll } = useFilmFilters();
@@ -16,6 +16,7 @@ export function FilterSidebar() {
         <span className="text-sm font-semibold">Filters</span>
         {Object.keys(filters).length > 0 && (
           <button
+            type="button"
             onClick={clearAll}
             className="text-xs text-muted-foreground hover:text-foreground transition-colors"
           >

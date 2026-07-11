@@ -1,12 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useAuth } from "@/contexts/auth-context";
+import { Eye, EyeOff, Film, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Film, Eye, EyeOff, Loader2 } from "lucide-react";
-import { useAuth } from "@/contexts/auth-context";
+import { Suspense, useState } from "react";
 
 export default function SignInPage() {
+  // useSearchParams() requires a Suspense boundary during prerendering.
+  return (
+    <Suspense fallback={null}>
+      <SignInForm />
+    </Suspense>
+  );
+}
+
+function SignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setUser } = useAuth();

@@ -1,6 +1,6 @@
-import { z } from "zod";
+import { ratings, users } from "@movie-haven/db";
 import { and, eq } from "drizzle-orm";
-import { users, ratings } from "@movie-haven/db";
+import { z } from "zod";
 import { protectedProcedure, router } from "../init";
 
 export const usersRouter = router({

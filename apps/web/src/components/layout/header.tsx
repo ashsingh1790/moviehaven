@@ -73,6 +73,7 @@ export function Header() {
           {user ? (
             <div className="relative" ref={menuRef}>
               <button
+                type="button"
                 onClick={() => setMenuOpen(o => !o)}
                 className="flex items-center gap-2 rounded-full border border-border bg-secondary px-3 py-1.5 text-sm hover:bg-accent transition-colors"
               >
@@ -98,6 +99,7 @@ export function Header() {
                       {exporting ? "Exporting…" : "Export library (OKF)"}
                     </button>
                     <button
+                      type="button"
                       onClick={() => {
                         setMenuOpen(false);
                         logout();

@@ -1,6 +1,6 @@
+import { listItems, lists } from "@movie-haven/db";
+import { and, eq } from "drizzle-orm";
 import { z } from "zod";
-import { eq, and } from "drizzle-orm";
-import { lists, listItems } from "@movie-haven/db";
 import { protectedProcedure, router } from "../init";
 
 export const listsRouter = router({

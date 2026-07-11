@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/auth-context";
+import { Check, Eye, EyeOff, Film, Loader2, RefreshCw, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Film, RefreshCw, Eye, EyeOff, Check, X, Loader2 } from "lucide-react";
-import { useAuth } from "@/contexts/auth-context";
+import { Suspense, useEffect, useState } from "react";
 
 function useDebounce<T>(value: T, ms: number): T {
   const [debounced, setDebounced] = useState(value);
@@ -16,6 +16,15 @@ function useDebounce<T>(value: T, ms: number): T {
 }
 
 export default function SignUpPage() {
+  // useSearchParams() requires a Suspense boundary during prerendering.
+  return (
+    <Suspense fallback={null}>
+      <SignUpForm />
+    </Suspense>
+  );
+}
+
+function SignUpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setUser } = useAuth();

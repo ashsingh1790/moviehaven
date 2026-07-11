@@ -1,10 +1,10 @@
-import Fastify from "fastify";
 import cors from "@fastify/cors";
 import rateLimit from "@fastify/rate-limit";
 import { fastifyTRPCPlugin } from "@trpc/server/adapters/fastify";
-import { appRouter } from "./trpc/router";
-import { createContext } from "./trpc/context";
+import Fastify from "fastify";
 import { redis } from "./lib/redis";
+import { createContext } from "./trpc/context";
+import { appRouter } from "./trpc/router";
 
 export type { AppRouter } from "./trpc/router";
 

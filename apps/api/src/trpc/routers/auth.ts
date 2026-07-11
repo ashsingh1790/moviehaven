@@ -1,11 +1,11 @@
-import { z } from "zod";
-import { eq } from "drizzle-orm";
-import { TRPCError } from "@trpc/server";
 import { users } from "@movie-haven/db";
-import { publicProcedure, protectedProcedure, router } from "../init";
-import { hashPassword, verifyPassword } from "../../lib/password";
+import { TRPCError } from "@trpc/server";
+import { eq } from "drizzle-orm";
+import { z } from "zod";
 import { signToken } from "../../lib/jwt";
+import { hashPassword, verifyPassword } from "../../lib/password";
 import { generateUsername, suggestUsernames } from "../../lib/username-generator";
+import { protectedProcedure, publicProcedure, router } from "../init";
 
 const passwordSchema = z
   .string()
