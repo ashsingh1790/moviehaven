@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>OKF Bundle Viewer</title>
+<script src="https://cdn.jsdelivr.net/npm/cytoscape@3.28.1/dist/cytoscape.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-size: 14px;
+  color: #0f172a;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+.title strong { font-size: 16px; margin-right: 8px; }
+.muted { color: #64748b; font-size: 12px; }
+.controls { display: flex; gap: 8px; }
+.controls input, .controls select, .controls button {
+  font-size: 13px;
+  padding: 5px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  background: #fff;
+}
+.controls input { width: 220px; }
+.controls button { cursor: pointer; background: #f1f5f9; }
+.controls button:hover { background: #e2e8f0; }
+
+main {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+#graph {
+  flex: 1 1 60%;
+  background: #fff;
+  border-right: 1px solid #e2e8f0;
+  min-width: 0;
+  position: relative;
+}
+#detail {
+  flex: 0 0 40%;
+  overflow-y: auto;
+  padding: 18px 22px;
+  background: #fff;
+}
+#detail-empty {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.detail-header { margin-bottom: 12px; }
+.detail-header h1 {
+  font-size: 18px;
+  margin: 4px 0 2px;
+  font-weight: 600;
+}
+.type-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+dl.frontmatter {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  row-gap: 4px;
+  column-gap: 12px;
+  margin: 8px 0 12px;
+  font-size: 13px;
+}
+dl.frontmatter dt {
+  color: #64748b;
+  font-weight: 500;
+}
+dl.frontmatter dd { margin: 0; }
+dl.frontmatter a { color: #2563eb; word-break: break-all; }
+
+.tag {
+  display: inline-block;
+  padding: 1px 6px;
+  margin: 0 4px 2px 0;
+  border-radius: 4px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 11px;
+}
+
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 14px 0; }
+
+#detail-body { font-size: 13px; line-height: 1.55; }
+#detail-body h1 {
+  font-size: 16px; margin: 18px 0 6px;
+  padding-bottom: 4px; border-bottom: 1px solid #e2e8f0;
+}
+#detail-body h2 { font-size: 14px; margin: 14px 0 4px; }
+#detail-body h3 { font-size: 13px; margin: 12px 0 4px; }
+#detail-body p { margin: 6px 0; }
+#detail-body code {
+  background: #f1f5f9;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+}
+#detail-body pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 10px 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 12px;
+}
+#detail-body pre code { background: transparent; color: inherit; padding: 0; }
+#detail-body ul, #detail-body ol { padding-left: 22px; margin: 6px 0; }
+#detail-body li { margin: 2px 0; }
+#detail-body table { border-collapse: collapse; margin: 8px 0; }
+#detail-body th, #detail-body td {
+  border: 1px solid #e2e8f0; padding: 4px 8px; font-size: 12px;
+}
+#detail-body a.internal { color: #2563eb; cursor: pointer; }
+#detail-body a.external { color: #2563eb; }
+
+#detail-backlinks { margin-top: 18px; }
+#detail-backlinks h2 { font-size: 13px; color: #64748b; margin-bottom: 6px; }
+#detail-backlinks ul { padding-left: 18px; }
+#detail-backlinks a { color: #2563eb; cursor: pointer; }
+
+</style>
+</head>
+<body>
+<header>
+  <div class="title">
+    <strong id="bundle-name"></strong>
+    <span class="muted">OKF bundle</span>
+  </div>
+  <div class="controls">
+    <input id="search" type="search" placeholder="Search title / id / tag">
+    <select id="filter-type">
+      <option value="">All types</option>
+    </select>
+    <select id="layout">
+      <option value="cose">cose (force)</option>
+      <option value="concentric">concentric</option>
+      <option value="breadthfirst">breadth-first</option>
+      <option value="circle">circle</option>
+      <option value="grid">grid</option>
+    </select>
+    <button id="reset">Reset view</button>
+  </div>
+</header>
+
+<main>
+  <section id="graph"></section>
+  <section id="detail">
+    <div id="detail-empty" class="muted">Click a node to see its details.</div>
+    <article id="detail-content" hidden>
+      <header class="detail-header">
+        <span class="type-chip" id="detail-type"></span>
+        <h1 id="detail-title"></h1>
+        <div class="muted" id="detail-id"></div>
+      </header>
+      <dl class="frontmatter">
+        <dt>Description</dt><dd id="detail-description"></dd>
+        <dt>Resource</dt><dd id="detail-resource"></dd>
+        <dt>Tags</dt><dd id="detail-tags"></dd>
+      </dl>
+      <hr>
+      <div id="detail-body"></div>
+      <section id="detail-backlinks" hidden>
+        <h2>Cited by</h2>
+        <ul id="backlinks-list"></ul>
+      </section>
+    </article>
+  </section>
+</main>
+
+<script>
+window.BUNDLE_NAME = "okf";
+window.BUNDLE = {"nodes": [{"data": {"id": "api/auth", "label": "auth router", "type": "API Surface", "description": "Registration, login, and username helpers; issues JWTs.", "resource": "apps/api/src/trpc/routers/auth.ts", "tags": [], "color": "#94a3b8", "size": 32}}, {"data": {"id": "api/export", "label": "export router", "type": "API Surface", "description": "Serializes a user's library into a downloadable OKF bundle.", "resource": "apps/api/src/trpc/routers/export.ts", "tags": [], "color": "#94a3b8", "size": 32}}, {"data": {"id": "api/films", "label": "films router", "type": "API Surface", "description": "Search and lookup over the film catalog.", "resource": "apps/api/src/trpc/routers/films.ts", "tags": [], "color": "#94a3b8", "size": 31}}, {"data": {"id": "api/lists", "label": "lists router", "type": "API Surface", "description": "CRUD for user lists and their films.", "resource": "apps/api/src/trpc/routers/lists.ts", "tags": [], "color": "#94a3b8", "size": 31}}, {"data": {"id": "api/tmdb", "label": "tmdb router", "type": "API Surface", "description": "TMDB-backed public lists for the landing page, cached in Redis.", "resource": "apps/api/src/trpc/routers/tmdb.ts", "tags": [], "color": "#94a3b8", "size": 31}}, {"data": {"id": "api/users", "label": "users router", "type": "API Surface", "description": "Profile and rating management for the authenticated user.", "resource": "apps/api/src/trpc/routers/users.ts", "tags": [], "color": "#94a3b8", "size": 31}}, {"data": {"id": "domain/film", "label": "Film", "type": "Entity", "description": "The core domain object \u2014 a movie with TMDB metadata, cast, crew, and scores.", "resource": "", "tags": [], "color": "#94a3b8", "size": 32}}, {"data": {"id": "domain/list-item", "label": "List item", "type": "Entity", "description": "A film's placement within a list, with ordering and an optional note.", "resource": "", "tags": [], "color": "#94a3b8", "size": 30}}, {"data": {"id": "domain/list", "label": "List", "type": "Entity", "description": "A user-curated collection of films (watchlist or custom list).", "resource": "", "tags": [], "color": "#94a3b8", "size": 31}}, {"data": {"id": "domain/rating", "label": "Rating", "type": "Entity", "description": "A user's score for a film, optionally carrying review text.", "resource": "", "tags": [], "color": "#94a3b8", "size": 31}}, {"data": {"id": "domain/user", "label": "User", "type": "Entity", "description": "A registered account that owns ratings and lists.", "resource": "", "tags": [], "color": "#94a3b8", "size": 31}}, {"data": {"id": "log", "label": "log", "type": "Unknown", "description": "", "resource": "", "tags": [], "color": "#94a3b8", "size": 30}}, {"data": {"id": "product/overview", "label": "Product overview", "type": "Product Doc", "description": "What Movie Haven is and the problem it solves.", "resource": "docs/PRD.md", "tags": [], "color": "#94a3b8", "size": 31}}, {"data": {"id": "product/phases", "label": "Delivery phases", "type": "Product Doc", "description": "The five-phase rollout from landing page to production scaling.", "resource": "docs/STORIES.md", "tags": [], "color": "#94a3b8", "size": 32}}, {"data": {"id": "schema/films", "label": "films table", "type": "DB Table", "description": "TMDB-sourced film metadata; the catalog every rating, list item, and streaming row points at.", "resource": "", "tags": [], "color": "#94a3b8", "size": 37}}, {"data": {"id": "schema/list-items", "label": "list_items table", "type": "DB Table", "description": "Join rows placing a film into a list, with ordering and an optional note.", "resource": "", "tags": [], "color": "#94a3b8", "size": 33}}, {"data": {"id": "schema/lists", "label": "lists table", "type": "DB Table", "description": "User-owned watchlists and custom lists; may be public or private.", "resource": "", "tags": [], "color": "#94a3b8", "size": 33}}, {"data": {"id": "schema/ratings", "label": "ratings table", "type": "DB Table", "description": "A user's 0.5\u201310 score for a film, with an optional embedded review. One row per (user, film).", "resource": "", "tags": [], "color": "#94a3b8", "size": 33}}, {"data": {"id": "schema/streaming-availability", "label": "streaming_availability table", "type": "DB Table", "description": "Cached per-country, per-platform streaming availability for a film (Phase 3+).", "resource": "", "tags": [], "color": "#94a3b8", "size": 33}}, {"data": {"id": "schema/users", "label": "users table", "type": "DB Table", "description": "Registered accounts with custom JWT auth (email + bcrypt password hash, optional username).", "resource": "", "tags": [], "color": "#94a3b8", "size": 33}}], "edges": [], "bodies": {"api/auth": "tRPC router mounted at `auth` (`apps/api/src/trpc/routers/auth.ts`). Manages accounts on the [users](/schema/users.md) table.\n\n- `register` (public mutation) \u2014 create a [user](/domain/user.md), hash password (bcrypt), return `{ user, token }`.\n- `login` (public mutation) \u2014 verify credentials in constant time, return `{ user, token }`.\n- `me` (protected query) \u2014 the authenticated user's profile.\n- `checkUsername` / `generateUsername` / `suggestUsernames` (public queries) \u2014 username availability + generation.", "api/export": "tRPC router mounted at `export` (`apps/api/src/trpc/routers/export.ts`). Protected.\n\n- `myLibraryOkf` (query) \u2014 builds an in-memory OKF bundle of the user's [ratings](/domain/rating.md), [lists](/domain/list.md), and an aggregate taste profile, validated before return. The web client zips and downloads it.\n\nUses the shared `@movie-haven/okf` emitter/validator \u2014 the same code that generates this catalog.", "api/films": "tRPC router mounted at `films` (`apps/api/src/trpc/routers/films.ts`). Reads the [films](/schema/films.md) table.\n\n- `search` (public query) \u2014 paginated `SearchResult<Film>` filtered by `FilmSearchParams` (query, genres, countries, year/score ranges, sort).\n- `byId` / `byTmdbId` (public queries) \u2014 single [film](/domain/film.md) lookup.", "api/lists": "tRPC router mounted at `lists` (`apps/api/src/trpc/routers/lists.ts`). All procedures are protected and scoped to the owner.\n\n- `myLists` (query) \u2014 the user's [lists](/domain/list.md).\n- `create` (mutation) \u2014 new list (name, optional description, `isPublic`).\n- `addFilm` / `removeFilm` (mutations) \u2014 manage [list items](/domain/list-item.md).", "api/tmdb": "tRPC router mounted at `tmdb` (`apps/api/src/trpc/routers/tmdb.ts`). Proxies TMDB via `apps/api/src/lib/tmdb.ts` and caches in Redis.\n\n- `popularMovies` (public query) \u2014 trending films for the landing carousels (6h cache).\n\nPhase-1 stories add `nowPlayingMovies`, `topBoxOfficeMovies`, and `topRatedMovies` (24h cache) \u2014 see [phases](/product/phases.md).", "api/users": "tRPC router mounted at `users` (`apps/api/src/trpc/routers/users.ts`). All procedures are protected.\n\n- `me` (query) \u2014 profile of the current [user](/domain/user.md).\n- `rateFilm` (mutation) \u2014 upsert a [rating](/domain/rating.md) (score 0.5\u201310, optional review \u2264 2000 chars).\n- `deleteRating` (mutation) \u2014 remove a rating.\n- `myRatings` (query) \u2014 the user's ratings, paginated.", "domain/film": "The central Movie Haven entity, defined in `@movie-haven/types` (`Film`) and persisted by the [films](/schema/films.md) table.\n\nA `Film` carries identity (`id`, `tmdbId`), descriptive metadata (`title`, `overview`, `tagline`, `runtime`, `releaseYear`), scoring (`tmdbScore`, `popularity`), and denormalized `genres`, `directors`, and `cast` arrays sourced from TMDB.\n\n`FilmCard` is the trimmed projection used in browse/search grids \u2014 poster, title, year, score, genres, plus optional `userRating` and `streamingPlatforms`.", "domain/list-item": "The join between a [list](/domain/list.md) and a [film](/domain/film.md), backed by [list_items](/schema/list-items.md). Carries a `position` for ordering and an optional per-entry `note`.", "domain/list": "A named collection of [films](/domain/film.md) owned by a user. Backed by [lists](/schema/lists.md) with membership rows in [list_items](/schema/list-items.md).\n\n`isWatchlist` distinguishes the canonical watchlist from ad-hoc lists (e.g. \"80s Sci-Fi\"); `isPublic` controls shareability.", "domain/rating": "A user's opinion of a [film](/domain/film.md): a `score` from 0.5 to 10 plus an optional `review` string. Persisted by the [ratings](/schema/ratings.md) table, one per (user, film).\n\nRatings are the primary signal for the Phase-4 recommendation engine and are upserted via `users.rateFilm`.", "domain/user": "A registered account, backed by the [users](/schema/users.md) table. Owns [ratings](/domain/rating.md) and [lists](/domain/list.md).\n\nAuthentication is custom JWT via `jose`; the token carries `userId` and `email`. See [auth router](/api/auth.md).", "log": "# Update Log\n\n## 2026-07-05\n* **Initialization**: Generated 19 concept document(s) into the `Movie Haven Knowledge Catalog` OKF bundle.\n", "product/overview": "Movie Haven is an intelligent film discovery platform that fixes \"what should I watch tonight\" paralysis with personalized, explainable recommendations.\n\nFull vision in `docs/PRD.md`. It understands a user's taste from [ratings](/domain/rating.md), [lists](/domain/list.md), and imports, then (Phase 4) blends ML scoring with LLM-written explanations.", "product/phases": "Movie Haven ships in five phases (see `docs/PRD.md` \u00a77 and `docs/STORIES.md`).\n\n1. Landing page, auth with username, demo profile, curated TMDB lists.\n2. Profile builder, IMDb import, ratings/reviews, watchlists, social auth.\n3. Filters, sorts, advanced search; streaming availability.\n4. ML recommendation engine + LLM explanations on a daily batch job.\n5. Production readiness: deployment, monitoring, security, GDPR export.\n\nPhase 1 is ~80% complete. The OKF [export router](/api/export.md) supports the Phase-5 data-portability goal.", "schema/films": "Every film Movie Haven knows about, imported and enriched from TMDB. One row per film, keyed internally by `id` and externally by the unique `tmdb_id`.\n\n# Schema\n\nPostgres table `films` (Drizzle ORM, `@movie-haven/db`).\n\n| Column | Type | Nullable | Notes |\n|--------|------|----------|-------|\n| `id` | serial | no | primary key, auto default |\n| `tmdb_id` | integer | no | unique |\n| `title` | text | no | \u2014 |\n| `original_title` | text | no | \u2014 |\n| `overview` | text | yes | \u2014 |\n| `tagline` | text | yes | \u2014 |\n| `poster_path` | text | yes | \u2014 |\n| `backdrop_path` | text | yes | \u2014 |\n| `release_date` | text | yes | \u2014 |\n| `release_year` | integer | yes | \u2014 |\n| `runtime` | integer | yes | \u2014 |\n| `budget` | integer | yes | default `0` |\n| `revenue` | integer | yes | default `0` |\n| `status` | text | yes | default `Released` |\n| `tmdb_score` | real | yes | default `0` |\n| `tmdb_vote_count` | integer | yes | default `0` |\n| `popularity` | real | yes | default `0` |\n| `adult` | boolean | yes | default `false` |\n| `genres` | jsonb | yes | auto default |\n| `origin_countries` | jsonb | yes | auto default |\n| `spoken_languages` | jsonb | yes | auto default |\n| `directors` | jsonb | yes | auto default |\n| `cast` | jsonb | yes | auto default |\n| `embedding_updated_at` | timestamp with time zone | yes | \u2014 |\n| `created_at` | timestamp with time zone | no | auto default |\n| `updated_at` | timestamp with time zone | no | auto default |", "schema/list-items": "A film's membership in a list, with a `position` for ordering and an optional `note`. One row per (list, film).\n\n# Schema\n\nPostgres table `list_items` (Drizzle ORM, `@movie-haven/db`).\n\n| Column | Type | Nullable | Notes |\n|--------|------|----------|-------|\n| `id` | serial | no | primary key, auto default |\n| `list_id` | integer | no | \u2014 |\n| `film_id` | integer | no | \u2014 |\n| `position` | integer | no | default `0` |\n| `note` | text | yes | \u2014 |\n| `added_at` | timestamp with time zone | no | auto default |\n\n# Foreign keys\n\n- `list_id` \u2192 [lists](/schema/lists.md).`id` (on delete cascade)\n- `film_id` \u2192 [films](/schema/films.md).`id` (on delete cascade)\n\n# Unique constraints\n\n- `list_id`, `film_id`", "schema/lists": "A user-owned list of films (e.g. a watchlist or a themed collection). `is_watchlist` marks the canonical watchlist; `is_public` gates sharing.\n\n# Schema\n\nPostgres table `lists` (Drizzle ORM, `@movie-haven/db`).\n\n| Column | Type | Nullable | Notes |\n|--------|------|----------|-------|\n| `id` | serial | no | primary key, auto default |\n| `user_id` | uuid | no | \u2014 |\n| `name` | text | no | \u2014 |\n| `description` | text | yes | \u2014 |\n| `is_watchlist` | boolean | no | default `false` |\n| `is_public` | boolean | no | default `false` |\n| `created_at` | timestamp with time zone | no | auto default |\n| `updated_at` | timestamp with time zone | no | auto default |\n\n# Foreign keys\n\n- `user_id` \u2192 [users](/schema/users.md).`id` (on delete cascade)", "schema/ratings": "A user's rating of a film on a 0.5\u201310 scale. Reviews are NOT a separate table \u2014 the optional `review` text column lives here.\n\n# Schema\n\nPostgres table `ratings` (Drizzle ORM, `@movie-haven/db`).\n\n| Column | Type | Nullable | Notes |\n|--------|------|----------|-------|\n| `id` | serial | no | primary key, auto default |\n| `user_id` | uuid | no | \u2014 |\n| `film_id` | integer | no | \u2014 |\n| `score` | real | no | \u2014 |\n| `review` | text | yes | \u2014 |\n| `created_at` | timestamp with time zone | no | auto default |\n| `updated_at` | timestamp with time zone | no | auto default |\n\n# Foreign keys\n\n- `user_id` \u2192 [users](/schema/users.md).`id` (on delete cascade)\n- `film_id` \u2192 [films](/schema/films.md).`id` (on delete cascade)\n\n# Unique constraints\n\n- `user_id`, `film_id`", "schema/streaming-availability": "Where a film can be streamed, by country and platform. Cached from JustWatch/TMDB with a ~24h TTL. One row per (film, country, platform).\n\n# Schema\n\nPostgres table `streaming_availability` (Drizzle ORM, `@movie-haven/db`).\n\n| Column | Type | Nullable | Notes |\n|--------|------|----------|-------|\n| `id` | serial | no | primary key, auto default |\n| `film_id` | integer | no | \u2014 |\n| `country` | text | no | \u2014 |\n| `platform` | text | no | \u2014 |\n| `stream_type` | text | no | default `subscription` |\n| `link` | text | yes | \u2014 |\n| `available` | boolean | no | default `true` |\n| `updated_at` | timestamp with time zone | no | auto default |\n\n# Foreign keys\n\n- `film_id` \u2192 [films](/schema/films.md).`id` (on delete cascade)\n\n# Unique constraints\n\n- `film_id`, `country`, `platform`", "schema/users": "A registered Movie Haven account. Auth is custom JWT (jose) \u2014 the `password_hash` is bcrypt; Clerk is not used despite being installed.\n\n# Schema\n\nPostgres table `users` (Drizzle ORM, `@movie-haven/db`).\n\n| Column | Type | Nullable | Notes |\n|--------|------|----------|-------|\n| `id` | uuid | no | primary key, auto default |\n| `email` | text | no | unique |\n| `password_hash` | text | no | \u2014 |\n| `username` | text | yes | unique |\n| `display_name` | text | yes | \u2014 |\n| `avatar_url` | text | yes | \u2014 |\n| `created_at` | timestamp with time zone | no | auto default |\n| `updated_at` | timestamp with time zone | no | auto default |"}, "types": ["API Surface", "DB Table", "Entity", "Product Doc", "Unknown"], "palette": {"BigQuery Dataset": "#8b5cf6", "BigQuery Table": "#3b82f6", "Reference": "#10b981"}};
+</script>
+<script>
+(function () {
+  const bundle = window.BUNDLE;
+  const bundleName = window.BUNDLE_NAME;
+  document.title = `${bundleName} — OKF Viewer`;
+  document.getElementById("bundle-name").textContent = bundleName;
+
+  // Populate type filter
+  const typeSelect = document.getElementById("filter-type");
+  for (const t of bundle.types) {
+    const opt = document.createElement("option");
+    opt.value = t;
+    opt.textContent = t;
+    typeSelect.appendChild(opt);
+  }
+
+  // Build reverse-link index for backlinks
+  const backlinks = {};
+  for (const edge of bundle.edges) {
+    const { source, target } = edge.data;
+    (backlinks[target] ||= []).push(source);
+  }
+
+  // Look up node label/type by id
+  const nodeIndex = {};
+  for (const n of bundle.nodes) nodeIndex[n.data.id] = n.data;
+
+  const cy = cytoscape({
+    container: document.getElementById("graph"),
+    elements: [...bundle.nodes, ...bundle.edges],
+    style: [
+      {
+        selector: "node",
+        style: {
+          "background-color": "data(color)",
+          "label": "data(label)",
+          "color": "#0f172a",
+          "font-size": 11,
+          "text-valign": "bottom",
+          "text-margin-y": 4,
+          "text-wrap": "wrap",
+          "text-max-width": 120,
+          "width": "data(size)",
+          "height": "data(size)",
+          "border-width": 1,
+          "border-color": "#0f172a",
+        },
+      },
+      {
+        selector: "node:selected",
+        style: {
+          "border-width": 3,
+          "border-color": "#f59e0b",
+        },
+      },
+      {
+        selector: "edge",
+        style: {
+          "width": 1.5,
+          "line-color": "#cbd5e1",
+          "target-arrow-color": "#cbd5e1",
+          "target-arrow-shape": "triangle",
+          "curve-style": "bezier",
+          "arrow-scale": 0.9,
+        },
+      },
+      {
+        selector: "edge:selected",
+        style: {
+          "line-color": "#f59e0b",
+          "target-arrow-color": "#f59e0b",
+          "width": 2.5,
+        },
+      },
+      {
+        selector: ".dim",
+        style: { "opacity": 0.15 },
+      },
+    ],
+    layout: { name: "cose", animate: false, padding: 30 },
+    wheelSensitivity: 0.2,
+  });
+
+  cy.on("tap", "node", (evt) => showDetail(evt.target.id()));
+  cy.on("tap", (evt) => {
+    if (evt.target === cy) clearSelection();
+  });
+
+  document.getElementById("layout").addEventListener("change", (e) => {
+    cy.layout({ name: e.target.value, animate: false, padding: 30 }).run();
+  });
+
+  document.getElementById("reset").addEventListener("click", () => {
+    cy.fit(null, 30);
+    clearSelection();
+  });
+
+  document.getElementById("search").addEventListener("input", (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    if (!q) {
+      cy.elements().removeClass("dim");
+      return;
+    }
+    cy.nodes().forEach((n) => {
+      const d = n.data();
+      const hay =
+        (d.label || "").toLowerCase() + " " +
+        d.id.toLowerCase() + " " +
+        (d.tags || []).join(" ").toLowerCase();
+      n.toggleClass("dim", !hay.includes(q));
+    });
+    cy.edges().forEach((edge) => {
+      const src = edge.source();
+      const tgt = edge.target();
+      edge.toggleClass("dim", src.hasClass("dim") || tgt.hasClass("dim"));
+    });
+  });
+
+  document.getElementById("filter-type").addEventListener("change", (e) => {
+    const t = e.target.value;
+    if (!t) {
+      cy.elements().removeClass("dim");
+      return;
+    }
+    cy.nodes().forEach((n) => {
+      n.toggleClass("dim", n.data("type") !== t);
+    });
+    cy.edges().forEach((edge) => {
+      edge.toggleClass("dim", edge.source().hasClass("dim") || edge.target().hasClass("dim"));
+    });
+  });
+
+  function clearSelection() {
+    cy.elements().unselect();
+    document.getElementById("detail-empty").hidden = false;
+    document.getElementById("detail-content").hidden = true;
+  }
+
+  function showDetail(conceptId) {
+    const data = nodeIndex[conceptId];
+    if (!data) return;
+    cy.elements().unselect();
+    const node = cy.getElementById(conceptId);
+    if (node) node.select();
+
+    document.getElementById("detail-empty").hidden = true;
+    const content = document.getElementById("detail-content");
+    content.hidden = false;
+
+    const chip = document.getElementById("detail-type");
+    chip.textContent = data.type;
+    chip.style.background = data.color;
+
+    document.getElementById("detail-title").textContent = data.label;
+    document.getElementById("detail-id").textContent = conceptId;
+    document.getElementById("detail-description").textContent = data.description || "—";
+
+    const resourceEl = document.getElementById("detail-resource");
+    resourceEl.innerHTML = "";
+    if (data.resource) {
+      const a = document.createElement("a");
+      a.href = data.resource;
+      a.textContent = data.resource;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.className = "external";
+      resourceEl.appendChild(a);
+    } else {
+      resourceEl.textContent = "—";
+    }
+
+    const tagsEl = document.getElementById("detail-tags");
+    tagsEl.innerHTML = "";
+    if (data.tags && data.tags.length) {
+      for (const t of data.tags) {
+        const span = document.createElement("span");
+        span.className = "tag";
+        span.textContent = t;
+        tagsEl.appendChild(span);
+      }
+    } else {
+      tagsEl.textContent = "—";
+    }
+
+    const body = bundle.bodies[conceptId] || "";
+    const html = marked.parse(body, { breaks: false, gfm: true });
+    const bodyEl = document.getElementById("detail-body");
+    bodyEl.innerHTML = html;
+    rewriteInternalLinks(bodyEl);
+
+    const bl = backlinks[conceptId] || [];
+    const blSection = document.getElementById("detail-backlinks");
+    const blList = document.getElementById("backlinks-list");
+    blList.innerHTML = "";
+    if (bl.length) {
+      blSection.hidden = false;
+      for (const src of bl) {
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.textContent = nodeIndex[src]?.label || src;
+        a.dataset.target = src;
+        a.addEventListener("click", () => showDetail(src));
+        li.appendChild(a);
+        const muted = document.createElement("span");
+        muted.className = "muted";
+        muted.textContent = ` (${src})`;
+        li.appendChild(muted);
+        blList.appendChild(li);
+      }
+    } else {
+      blSection.hidden = true;
+    }
+
+    cy.animate({ center: { eles: node }, zoom: Math.max(cy.zoom(), 1.0) }, { duration: 200 });
+  }
+
+  function rewriteInternalLinks(root) {
+    root.querySelectorAll("a[href]").forEach((a) => {
+      const href = a.getAttribute("href");
+      if (!href) return;
+      if (href.startsWith("/") && href.endsWith(".md")) {
+        const target = href.slice(1, -3);
+        if (nodeIndex[target]) {
+          a.className = "internal";
+          a.setAttribute("href", "javascript:void(0)");
+          a.addEventListener("click", (e) => {
+            e.preventDefault();
+            showDetail(target);
+          });
+          return;
+        }
+      }
+      a.className = "external";
+      a.setAttribute("target", "_blank");
+      a.setAttribute("rel", "noopener");
+    });
+  }
+
+  // Auto-show the first node (a dataset if available, else first concept)
+  const initial =
+    bundle.nodes.find((n) => n.data.type === "BigQuery Dataset") ||
+    bundle.nodes[0];
+  if (initial) showDetail(initial.data.id);
+})();
+
+</script>
+</body>
+</html>
