@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
 import type { SortChip } from "@movie-haven/types";
 import { trpc } from "@/lib/trpc/client";
@@ -169,6 +169,22 @@ function FilmGridSkeleton() {
 }
 
 export default function FilmsPage() {
+  return (
+    // useSearchParams() (via nuqs in useFilmFilters) requires a Suspense boundary
+    // during prerendering.
+    <Suspense
+      fallback={
+        <div className="p-4 lg:p-6">
+          <FilmGridSkeleton />
+        </div>
+      }
+    >
+      <FilmsPageContent />
+    </Suspense>
+  );
+}
+
+function FilmsPageContent() {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
