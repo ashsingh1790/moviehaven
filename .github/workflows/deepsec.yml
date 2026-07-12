@@ -1,0 +1,183 @@
+# PR diff-gate for the deepsec security scanner (GW-D5).
+#
+# Wraps `pnpm deepsec process --diff` (see .claude/skills/deepsec/) as a
+# required PR check. Diff-mode only — never a full-repo scan in CI, since
+# that can cost hundreds to tens of thousands of dollars.
+#
+# Two-project monorepo: .deepsec/deepsec.config.ts registers `api`
+# (apps/api) and `web` (apps/web) separately, so we run the diff scan once
+# per project. An unaffected project costs nothing — `process --diff` exits
+# 0 immediately when 0 files in its rootPath changed.
+#
+# Two-job split (analyze / comment), per the skill's documented pattern:
+# `analyze` runs with the AI Gateway secret but no `pull-requests: write`;
+# `comment` has write access but never checks out PR code. This prevents a
+# malicious PR from exfiltrating the secret via a PR-controlled `pnpm install`
+# and weaponizing comment-write access in the same job.
+#
+# Required secret: AI_GATEWAY_API_KEY (Vercel AI Gateway key covering both
+# Claude + Codex backends — see .claude/skills/deepsec/references/models-and-keys.md).
+# Add at: repo Settings -> Secrets and variables -> Actions -> New repository secret.
+# Until it's added, this workflow fail-softs: it emits a ::warning:: and skips
+# the scan (green check), rather than blocking every PR with a red X.
+
+name: deepsec
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+    paths:
+      - "apps/**"
+      - "packages/**"
+      - ".github/workflows/deepsec.yml"
+
+concurrency:
+  group: deepsec-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze diff
+    # Same-repo gate: fork PRs would expose AI_GATEWAY_API_KEY via a
+    # PR-controlled `pnpm install` inside .deepsec/. Never run this job for
+    # fork PRs. Also skip dependabot PRs — dependency bumps aren't the kind
+    # of diff deepsec needs to review, and this keeps cost down.
+    if: |
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    permissions:
+      contents: read # NO pull-requests:write — that's the comment job's role.
+
+    env:
+      AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
+      CLAUDE_CODE_EXECUTABLE: claude
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # required for `git diff origin/<base-ref>`
+
+      - name: Check for required secret
+        id: secret-check
+        run: |
+          if [ -n "${AI_GATEWAY_API_KEY}" ]; then
+            echo "has_secret=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_secret=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::AI_GATEWAY_API_KEY secret is not set — skipping deepsec scan (not failing the build). Add it at Settings -> Secrets and variables -> Actions to enable this check."
+          fi
+
+      - uses: pnpm/action-setup@v4
+        if: steps.secret-check.outputs.has_secret == 'true'
+        # No `with: version:` pin — reads packageManager from package.json.
+
+      - uses: actions/setup-node@v4
+        if: steps.secret-check.outputs.has_secret == 'true'
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: .deepsec/pnpm-lock.yaml
+
+      - name: Install Claude Code CLI
+        if: steps.secret-check.outputs.has_secret == 'true'
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Install deepsec
+        if: steps.secret-check.outputs.has_secret == 'true'
+        working-directory: .deepsec
+        run: pnpm install --frozen-lockfile
+
+      - name: Scan diff — api project
+        if: steps.secret-check.outputs.has_secret == 'true'
+        id: scan-api
+        working-directory: .deepsec
+        run: |
+          set +e
+          pnpm deepsec process \
+            --project-id api \
+            --diff "origin/${{ github.event.pull_request.base.ref }}" \
+            --agent claude \
+            --comment-out comment-api.md
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Scan diff — web project
+        if: steps.secret-check.outputs.has_secret == 'true'
+        id: scan-web
+        working-directory: .deepsec
+        run: |
+          set +e
+          pnpm deepsec process \
+            --project-id web \
+            --diff "origin/${{ github.event.pull_request.base.ref }}" \
+            --agent claude \
+            --comment-out comment-web.md
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Merge comments and gate on findings
+        if: steps.secret-check.outputs.has_secret == 'true'
+        working-directory: .deepsec
+        run: |
+          api_exit="${{ steps.scan-api.outputs.exit_code }}"
+          web_exit="${{ steps.scan-web.outputs.exit_code }}"
+          echo "api exit code: $api_exit"
+          echo "web exit code: $web_exit"
+
+          cat comment-api.md comment-web.md > comment.md 2>/dev/null
+
+          # `process --diff` exit codes: 0 = no net-new findings, 1 = net-new
+          # findings (the gate signal), anything else = runtime error.
+          for pair in "api:$api_exit" "web:$web_exit"; do
+            name="${pair%%:*}"
+            code="${pair##*:}"
+            if [ "$code" != "0" ] && [ "$code" != "1" ]; then
+              echo "::error::deepsec runtime error on $name project (exit $code) — see logs above, not a findings failure"
+              exit "$code"
+            fi
+          done
+
+          if [ "$api_exit" = "1" ] || [ "$web_exit" = "1" ]; then
+            echo "::error::deepsec found net-new findings on this diff — see the deepsec-comment artifact"
+            exit 1
+          fi
+
+          echo "no net-new findings — gate passes"
+
+      - name: Upload findings artifact
+        if: failure() && steps.secret-check.outputs.has_secret == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: deepsec-comment
+          path: .deepsec/comment.md
+          if-no-files-found: ignore
+
+  comment:
+    name: Post findings comment
+    needs: analyze
+    if: needs.analyze.result == 'failure'
+    runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write # the privilege lives here, never near PR code
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: deepsec-comment
+        continue-on-error: true
+
+      - name: Post comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -s comment.md ]; then
+            gh pr comment "${{ github.event.pull_request.number }}" \
+              --repo "${{ github.repository }}" \
+              --body-file comment.md
+          fi
