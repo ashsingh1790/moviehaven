@@ -48,6 +48,12 @@ export const listsRouter = router({
   removeFilm: protectedProcedure
     .input(z.object({ listId: z.number(), filmId: z.number() }))
     .mutation(async ({ ctx, input }) => {
+      const list = await ctx.db.query.lists.findFirst({
+        where: and(eq(lists.id, input.listId), eq(lists.userId, ctx.userId)),
+      });
+
+      if (!list) throw new Error("List not found");
+
       await ctx.db
         .delete(listItems)
         .where(and(eq(listItems.listId, input.listId), eq(listItems.filmId, input.filmId)));
