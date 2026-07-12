@@ -1,0 +1,116 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/session-start-context.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/protect-generated-and-vendored.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/guard-bash-commands.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/format-changed-file.sh",
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/okf-rebuild-on-schema-change.sh",
+            "timeout": 60,
+            "statusMessage": "Regenerating OKF catalog…"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/reflect-on-session.sh",
+            "timeout": 30,
+            "statusMessage": "Reflecting on session for CLAUDE.md updates…"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(pnpm add *)",
+      "Bash(npx pnpm *)",
+      "Bash(node -e \"require\\('corepack'\\)\")",
+      "Bash(node -e \"const { execSync } = require\\('child_process'\\); try { console.log\\(execSync\\('corepack pnpm --version'\\).toString\\(\\)\\); } catch\\(e\\) { console.log\\('corepack failed:', e.message\\); }\")",
+      "Bash(export PATH=\"$PATH:/usr/local/bin:/opt/homebrew/bin:/usr/bin\")",
+      "Bash(export PATH=\"$PATH:$HOME/.nvm/versions/node/v24.15.0/bin\")",
+      "Bash(pnpm exec *)",
+      "Bash(export PATH=\"$PATH:$HOME/.nvm/versions/node/v24.15.0/bin:/opt/homebrew/bin:/usr/local/bin\")",
+      "Bash(psql postgresql://postgres:password@localhost:5432/movie_haven -c ' *)",
+      "Bash(node -e ' *)",
+      "Bash(node --input-type=module)",
+      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(48\\).toString\\('hex'\\)\\)\")",
+      "Bash(git init *)",
+      "Bash(git config *)",
+      "Bash(git check-ignore *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git commit *)",
+      "Bash(gh repo *)",
+      "Bash(gh issue list *)",
+      "Bash(gh issue create *)",
+      "Bash(gh issue edit *)",
+      "Bash(gh issue close *)",
+      "Bash(gh issue view *)",
+      "Bash(gh issue comment *)",
+      "Bash(gh pr create *)",
+      "Bash(gh pr list *)",
+      "Bash(gh pr view *)",
+      "Bash(gh pr review *)",
+      "Bash(gh pr merge *)",
+      "Bash(gh pr edit *)",
+      "Bash(gh label list *)",
+      "Bash(gh label create *)",
+      "Bash(gh milestone list *)",
+      "Bash(gh release list *)",
+      "Bash(gh release create *)",
+      "Bash(gh api *)"
+    ],
+    "additionalDirectories": [
+      "/Users/sanjeevani/dev/AI Projects/MovieHaven/apps/web/src/app/(auth)/sign-in/[[...sign-in]]"
+    ]
+  }
+}

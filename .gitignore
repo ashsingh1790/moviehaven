@@ -35,8 +35,14 @@ pnpm-debug.log*
 # Drizzle
 drizzle/
 
-# Claude Code local settings
-.claude/
+# Claude Code: version-control the shareable harness (agents, hooks, skills,
+# commands, permissions); keep local state + agent worktrees out of git.
+.claude/*
+!.claude/agents/
+!.claude/commands/
+!.claude/hooks/
+!.claude/skills/
+!.claude/settings.json
 plans/
 skills-lock.json
 
