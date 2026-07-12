@@ -10,7 +10,9 @@ Movie Haven is an intelligent film discovery platform — personalized recommend
 > **Companion files** (open directly when needed — not loaded automatically):
 > - @README.md — project overview
 > - @docs/PRD.md — product requirements
-> - @docs/STORIES.md — user stories
+> - @docs/STORIES.md — user stories (spec: phases + acceptance criteria)
+> - @docs/PROGRESS.md — completed-work log per phase (with beyond-AC notes)
+> - @docs/FOLLOWUP.md — follow-up backlog (sub-phases 1.1, 1.2, …; worked before the next major phase)
 > - @docs/TESTING.md — test strategy and examples
 > - @.claude/settings.json — Claude Code permissions
 
