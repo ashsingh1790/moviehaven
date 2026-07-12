@@ -1,0 +1,89 @@
+# Drop in to .github/workflows/deepsec.yml
+#
+# Two-job pattern: `analyze` runs PR code with the AI Gateway secret but no
+# write permissions; `comment` posts the artifact and never sees PR code.
+# This split is what makes it safe to give the analyzer access to the API key.
+#
+# Required secrets:
+#   AI_GATEWAY_API_KEY  (from Vercel AI Gateway — covers Claude + Codex)
+#
+# See references/pr-review.md for adapting this template.
+
+name: deepsec
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    # Only run on same-repo PRs — fork PRs would have access to the secret
+    # via PR-controlled `pnpm install`, which is an exfiltration vector.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    permissions:
+      contents: read    # NO pull-requests:write — that's the comment job's role.
+
+    env:
+      AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
+      CLAUDE_CODE_EXECUTABLE: claude
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0    # required for `git diff origin/<base-ref>`
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm install -g @anthropic-ai/claude-code pnpm
+
+      - name: Install deepsec
+        working-directory: .deepsec
+        run: pnpm install
+
+      - name: Run deepsec on diff
+        working-directory: .deepsec
+        run: |
+          pnpm deepsec process \
+            --diff "origin/${{ github.event.pull_request.base.ref }}" \
+            --agent claude \
+            --comment-out comment.md
+
+      - name: Upload comment artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deepsec-comment
+          path: .deepsec/comment.md
+          if-no-files-found: ignore
+
+  comment:
+    needs: analyze
+    if: needs.analyze.result == 'failure'
+    runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write   # ← the privilege lives here, never near PR code
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: deepsec-comment
+
+      - name: Post comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -s comment.md ]; then
+            gh pr comment "${{ github.event.pull_request.number }}" \
+              --repo "${{ github.repository }}" \
+              --body-file comment.md
+          fi

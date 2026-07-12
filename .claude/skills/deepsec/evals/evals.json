@@ -1,0 +1,33 @@
+{
+  "skill_name": "deepsec",
+  "evals": [
+    {
+      "id": 0,
+      "name": "first-time-setup",
+      "prompt": "I just heard about deepsec and I want to run my first scan on my Express + Postgres API repo. We're a small team and we don't really have a security person. Walk me through the setup so I don't blow up our budget — I've heard these scans can be expensive. The repo is about 800 source files. I have a Vercel account.",
+      "expected_output": "Step-by-step walkthrough that includes: npx deepsec init from repo root, cd .deepsec && pnpm install, the bootstrap prompt (verbatim or close) for INFO.md, AI_GATEWAY_API_KEY in .env.local, scan, process --limit 50 BEFORE unbounded process, cost projection from the limited run, then process, optional revalidate --min-severity HIGH, export. Warns about cost up front. Specifies --agent claude or --agent codex explicitly rather than relying on default.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "pr-review-ci",
+      "prompt": "I want to add deepsec to my GitHub Actions pipeline so it scans every PR and posts a comment with any new security findings. It's a public repo and I'm worried about fork PRs being able to exfiltrate my AI Gateway key. Show me a complete workflow file and explain the security model.",
+      "expected_output": "Two-job GH Actions workflow: analyze job (no pull-requests:write, has AI_GATEWAY_API_KEY) and comment job (has pull-requests:write, no PR code). Uses process --diff origin/<base> with --comment-out. fetch-depth: 0 in checkout. Same-repo gate (head.repo.full_name == repository) to block fork PRs. Explains why the two-job split is necessary (AI Gateway key exposure during PR-controlled pnpm install). Notes exit code 1 = findings, not error. Sets CLAUDE_CODE_EXECUTABLE if using --agent claude.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "triage-noisy-findings",
+      "prompt": "I ran `pnpm deepsec process` against my codebase and got 230 findings. A bunch of them look wrong — for example it keeps flagging our internal admin route as 'unauthenticated', but we have a middleware that protects all admin routes. How do I (1) cut down the false positives and (2) prioritize what to actually fix first? I want a clean list to bring to my team.",
+      "expected_output": "Recommends revalidate --min-severity HIGH first (cuts FPs ~50%+). Recommends adding a clear note to INFO.md about the admin middleware (not adding to ignorePaths as first move). Then triage for P0/P1/P2 prioritization (~1¢/finding). Then export --format md-dir --out ./findings for human review. Mentions that mixing agents (--agent codex --reinvestigate) gives second-opinion signal.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "writing-matcher-coverage",
+      "prompt": "Deepsec keeps missing vulnerabilities in our internal RPC handlers. They live under src/rpc/ and they're not standard Express routes — they're invoked via a custom message bus. The default scan barely touches them. How do I tell deepsec to actually look at this code?",
+      "expected_output": "Explains matchers vs INFO.md: matchers add candidates, INFO.md shapes what the AI does with them. Recommends a noisy-tier matcher anchored to src/rpc/**/*.ts (NOT **/*.ts which would wedge the scanner). Points at .deepsec/node_modules/deepsec/dist/samples/webapp/matchers/ for the canonical examples and config.d.ts for the type. Wires it into an inline plugin in deepsec.config.ts. Validates with pnpm deepsec scan --matchers <slug>. Mentions running scan + process --limit 50 first to get baseline data before authoring.",
+      "files": []
+    }
+  ]
+}
