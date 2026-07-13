@@ -33,7 +33,7 @@
   "devDependencies": {
     "@movie-haven/api": "workspace:*",
     "@movie-haven/config": "workspace:*",
-    "@next/bundle-analyzer": "^15.5.18",
+    "@next/bundle-analyzer": "^16.2.10",
     "@tailwindcss/postcss": "^4.3.2",
     "@types/node": "^26.1.1",
     "@types/react": "^19.2.17",
