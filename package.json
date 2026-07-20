@@ -29,7 +29,7 @@
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@vitest/coverage-v8": "^4.1.10",
-    "turbo": "^2.10.4",
+    "turbo": "^2.10.5",
     "typescript": "^6.0.3",
     "vitest": "^4.1.10"
   },
